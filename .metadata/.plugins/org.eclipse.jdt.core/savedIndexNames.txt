@@ -1,1 +1,0 @@
-INDEX VERSION 1.129+\\Mac\Home\Documents\code\HSAMR\.metadata\.plugins\org.eclipse.jdt.core
