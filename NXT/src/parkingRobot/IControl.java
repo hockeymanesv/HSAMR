@@ -1,6 +1,5 @@
 package parkingRobot;
 
-//import
 import lejos.robotics.navigation.Pose;
 
 /**
