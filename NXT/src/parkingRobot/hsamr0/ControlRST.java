@@ -17,12 +17,12 @@ public class ControlRST implements IControl {
 	
 	/**
 	 * reference to {@link IPerception.EncoderSensor} class for left robot wheel which measures the wheels angle difference
-	 * between actual an last request
+	 * between actual and last request
 	 */
 	IPerception.EncoderSensor encoderLeft							=	null;
 	/**
 	 * reference to {@link IPerception.EncoderSensor} class for right robot wheel which measures the wheels angle difference
-	 * between actual an last request
+	 * between actual and last request
 	 */
 	IPerception.EncoderSensor encoderRight							=	null;
 	
@@ -143,6 +143,7 @@ public class ControlRST implements IControl {
 	
 	/**
 	 * sets current pose
+	 * Pose = Position
 	 * @see parkingRobot.IControl#setPose(Pose currentPosition)
 	 */
 	public void setPose(Pose currentPosition) {
