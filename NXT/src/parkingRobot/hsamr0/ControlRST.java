@@ -256,8 +256,8 @@ public class ControlRST implements IControl {
 	private void exec_LINECTRL_ALGO(){
 		leftMotor.forward();
 		rightMotor.forward();
-		int lowPower = 1;
-		int highPower = 30;
+		int lowPower = 30;
+		int highPower = 255;
 		
 		// MONITOR (example)
 		monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeft);
