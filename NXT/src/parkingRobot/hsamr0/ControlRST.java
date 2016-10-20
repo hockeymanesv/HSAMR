@@ -260,6 +260,10 @@ public class ControlRST implements IControl {
 	 * Linienverfolgung fuer gegebene Werte 0,1,2
 	 * white = 0, black = 2, grey = 1
 	 * hier muss die Erweiterung mit den Farbverlaufen stattfinden (Aufgabe 3.1 Variante 1 und 2)
+	 * Idee: solange sich die Sensoren in einem definiertem Farbraum befinden, findet
+	 * nur vorwaertsfahren statt. Sobald sie sich in einen grauen Bereich bewegen, bekommt ein
+	 * Motor mehr Power als der andere, so dass der Roboter sich wieder zurueckdreht, dabei soll
+	 * aber der andere Motor nicht stehen bleiben --> Erhoehung der Geschwindigkeit
 	 */
     
 	private void exec_LINECTRL_ALGO(){
