@@ -259,7 +259,10 @@ public class ControlRST implements IControl {
 	 * Minimalbeispiel
 	 * Linienverfolgung fuer gegebene Werte 0,1,2
 	 * white = 0, black = 2, grey = 1
-	 * hier muss die Erweiterung mit den Farbverlaufen stattfinden (Aufgabe 3.1 Variante 1 und 2)
+	 * Idee fuer die Aufgabe 3.1 Variante 1: Statt lowPower auf 1 zu setzen, kann hier ein
+	 * hoeherer Wert gewaehlt werden, es muss aber darauf geachtet werden, dass die Drehung
+	 * nicht zu langsam erfolgt.
+	 * hier muss die Erweiterung mit den Farbverlaufen stattfinden (Aufgabe 3.1 Variante 2)
 	 * Idee: solange sich die Sensoren in einem definiertem Farbraum befinden, findet
 	 * nur vorwaertsfahren statt. Sobald sie sich in einen grauen Bereich bewegen, bekommt ein
 	 * Motor mehr Power als der andere, so dass der Roboter sich wieder zurueckdreht, dabei soll
