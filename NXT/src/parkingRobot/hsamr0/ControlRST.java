@@ -11,7 +11,7 @@ import parkingRobot.INavigation;
 
 /**
  * Main class for control module
- *
+ * setting start parameters
  */
 public class ControlRST implements IControl {
 	
@@ -53,24 +53,29 @@ public class ControlRST implements IControl {
 	INavigation navigation = null;
 	IMonitor monitor = null;
 	ControlThread ctrlThread = null;
-
+	
+	//Motor Power
     int leftMotorPower = 0;
 	int rightMotorPower = 0;
 	
+	//Speed parameters
 	double velocity = 0.0;
 	double angularVelocity = 0.0;
 	
+	//Position parameters
 	Pose startPosition = new Pose();
 	Pose currentPosition = new Pose();
 	Pose destination = new Pose();
 	
 	ControlMode currentCTRLMODE = null;
 	
+	//Encoder
 	EncoderSensor controlRightEncoder    = null;
 	EncoderSensor controlLeftEncoder     = null;
 
 	int lastTime = 0;
 	
+	//Distance
     double currentDistance = 0.0;
     double Distance = 0.0;
   
@@ -86,6 +91,7 @@ public class ControlRST implements IControl {
 	 * @param rightMotor corresponding NXTMotor object
 	 */
 	public ControlRST(IPerception perception, INavigation navigation, NXTMotor leftMotor, NXTMotor rightMotor, IMonitor monitor){
+		//Setting other modules
 		this.perception = perception;
         this.navigation = navigation;
         this.monitor = monitor;
@@ -93,13 +99,15 @@ public class ControlRST implements IControl {
 		this.rightMotor = rightMotor;
 		
 		this.currentCTRLMODE = ControlMode.INACTIVE;
-			
+		
+		//setting encoders and sensors
 		this.encoderLeft  = perception.getControlLeftEncoder();
 		this.encoderRight = perception.getControlRightEncoder();
 		this.lineSensorRight		= perception.getRightLineSensor();
 		this.lineSensorLeft  		= perception.getLeftLineSensor();
 		
 		// MONITOR (example)
+		// what happens here
 		monitor.addControlVar("RightSensor");
 		monitor.addControlVar("LeftSensor");
 		
@@ -126,7 +134,7 @@ public class ControlRST implements IControl {
 	 * @see parkingRobot.IControl#setAngularVelocity(double angularVelocity)
 	 */
 	public void setAngularVelocity(double angularVelocity) {
-		this.angularVelocity = angularVelocity;
+		this.angularVelocity = angularVelocity; //Winkelgeschwindigkeit w
 
 	}
 	
@@ -251,6 +259,7 @@ public class ControlRST implements IControl {
 	 * Minimalbeispiel
 	 * Linienverfolgung fuer gegebene Werte 0,1,2
 	 * white = 0, black = 2, grey = 1
+	 * hier muss die Erweiterung mit den Farbverlaufen stattfinden (Aufgabe 3.1 Variante 1 und 2)
 	 */
     
 	private void exec_LINECTRL_ALGO(){
