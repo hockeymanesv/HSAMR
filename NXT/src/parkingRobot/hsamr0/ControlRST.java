@@ -273,16 +273,18 @@ public class ControlRST implements IControl {
 		leftMotor.forward();
 		rightMotor.forward();
 		int lowPower = 1;
-		int highPower = 30;
+		int midPower = 15;
+		int highPower = 40;//30;
 		
 		// MONITOR (example)
 		monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeft);
 		monitor.writeControlVar("RightSensor", "" + this.lineSensorRight);
-
+		
+		//ab hier Variante 1
         if(this.lineSensorLeft == 2 && (this.lineSensorRight == 1)){
 			
 			// when left sensor is on the line, turn left
-    	    leftMotor.setPower(lowPower);
+    	    leftMotor.setPower(midPower);
 			rightMotor.setPower(highPower);
 			
 			// MONITOR (example)
@@ -293,7 +295,7 @@ public class ControlRST implements IControl {
 		
 			// when right sensor is on the line, turn right
 			leftMotor.setPower(highPower);
-			rightMotor.setPower(lowPower);
+			rightMotor.setPower(midPower);
 			
 			// MONITOR (example)
 			monitor.writeControlComment("turn right");
@@ -336,6 +338,20 @@ public class ControlRST implements IControl {
 			// MONITOR (example)
 			monitor.writeControlComment("turn right");
 		}
+        
+        // ab hier Variante 2
+        //hier muessen die ranges festgelegt werden
+        /*int upperBound=80;
+        int midBound=40;
+        int lowerBound=10;
+        if(this.lineSensorLeft>=upperBound && this.lineSensorRight>=upperBound){
+        	leftMotor.setPower(highPower);
+        	rightMotor.setPower(highPower);
+        }
+        else if(this.lineSensorLeft>=upperBound && (this.lineSensorRight<=upperBound && this.lineSensorRight>=midBound)){
+        	
+        }
+        else if()*/
 	}
 	
 	private void stop(){
