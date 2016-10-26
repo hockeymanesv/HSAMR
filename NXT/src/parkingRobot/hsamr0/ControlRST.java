@@ -344,6 +344,7 @@ public class ControlRST implements IControl {
         /*int upperBound=80;
         int midBound=40;
         int lowerBound=10;
+        
         if(this.lineSensorLeft>=upperBound && this.lineSensorRight>=upperBound){
         	leftMotor.setPower(highPower);
         	rightMotor.setPower(highPower);
@@ -351,7 +352,28 @@ public class ControlRST implements IControl {
         else if(this.lineSensorLeft>=upperBound && (this.lineSensorRight<=upperBound && this.lineSensorRight>=midBound)){
         	
         }
-        else if()*/
+        else if()
+        
+        *
+        * Implementierung PID Regler
+        * y=Kp*e+Ki*Ta*esum+Kd(e-ealt)*1/Ta
+        *
+		int Kp;
+		int Ki;
+		int Kd;
+		int Tn;
+		int Tv;
+		  static int esum; 
+		  static int ealt; 
+		  int y; 
+		  
+		  esum = esum + e; 
+		  y = Kp * e + Ki * 1/Ti * esum + Kd * (e – ealt)*Td; 
+		  ealt = e; 
+		  
+		  return y; 
+}
+        */
 	}
 	
 	private void stop(){
