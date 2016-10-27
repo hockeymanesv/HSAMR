@@ -367,9 +367,41 @@ public class ControlRST implements IControl {
 			}
 		} else if(version==1) {
 			
-			int desBlackRight=29;
-			int desBlackLeft=33;
+			//desired values from perception
+			final int desBlackRight=29; 
+			final int desBlackLeft=33;
+			final int desGreyRight=44;
+			final int desGreyLeft=48;
+			final int desWhiteRight=59;
+			final int desWhiteLeft=63;
+			// parameters for PID
+			final int kp=1;
+			final int ki=1;
+			final int kd=1;
+			final int ti=1;
+			final int td=1;
+			static int esum=0;
+			// sensor values
+			int actRightSensor=0;
+			int actLeftSensor=0;
+			int oldRightSensor=0;
+			int oldLeftSensor=0;
+			actRightSensor=this.lineSensorRightV;
+			actLeftSensor=this.lineSensorLeftV;
 			
+			// PID
+			int powerRight=kp*actRightSensor+ki/ti*esum+kd*(actRightSensor-oldRightSensor)*td;
+			int powerLeft=kp*actLeftSensor+ki/ti*esum+kd*(actLeftSensor-oldLeftSensor)*td;
+			
+			// set power for motors
+			leftMotor.setPower(powerLeft);
+			rightMotor.setPower(powerRight);
+			
+			// set new parameters
+			oldRightSensor=actRightSensor;
+			oldLeftSensor=actLeftSensor;
+			sumRightSensor=sumRightSensor+actRightSensor;
+			sumLeftSensor=sumLeftSensor+actLeftSensor;
 			// ab hier Variante 2
 			// hier muessen die ranges festgelegt werden
 			/*
@@ -390,8 +422,9 @@ public class ControlRST implements IControl {
 			 * int Kp; int Ki; int Kd; int Tn; int Tv; static int esum; static
 			 * int ealt; int y;
 			 * 
-			 * esum = esum + e; y = Kp * e + Ki * 1/Ti * esum + Kd * (e –
-			 * ealt)*Td; ealt = e;
+			 * esum = esum + e; 
+			 * y = Kp * e + Ki * 1/Ti * esum + Kd * (e – ealt)*Td; 
+			 * ealt = e;
 			 * 
 			 * return y;
 			 * 
