@@ -54,9 +54,14 @@ public class ControlRST implements IControl {
 	 */
 	int lineSensorRightV = 0;
 	/**
-	 * line information measured by lef light sensor, values from 0 to 100
+	 * line information measured by left light sensor, values from 0 to 100
 	 */
 	int lineSensorLeftV = 0;
+	/**
+	 * sums of the measured sensor data for integral
+	 */
+	static int sumRightSensor=0;
+	static int sumLeftSensor=0;
 
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
@@ -302,7 +307,7 @@ public class ControlRST implements IControl {
 	private void exec_LINECTRL_ALGO() {
 		leftMotor.forward();
 		rightMotor.forward();
-		int version = 0; // 0 --> drei farbwerte, 1--> PID
+		int version = 1; // 0 --> drei farbwerte, 1--> PID
 
 		if (version == 0) { // Entscheidung je nach Version
 			int lowPower = 5;// 15;
@@ -380,7 +385,6 @@ public class ControlRST implements IControl {
 			final int kd=1;
 			final int ti=1;
 			final int td=1;
-			static int esum=0;
 			// sensor values
 			int actRightSensor=0;
 			int actLeftSensor=0;
@@ -389,19 +393,36 @@ public class ControlRST implements IControl {
 			actRightSensor=this.lineSensorRightV;
 			actLeftSensor=this.lineSensorLeftV;
 			
+			// differences
+			int deltaRightSensor=0;
+			int deltaLeftSensor=0;
+			int deltaRightSensorOld=0;
+			int deltaLeftSensorOld=0;
+			
+			// calculation delta light Sensors
+			deltaRightSensor=desBlackRight-actRightSensor;
+			deltaLeftSensor=desBlackLeft-actLeftSensor;
+			
 			// PID
-			int powerRight=kp*actRightSensor+ki/ti*esum+kd*(actRightSensor-oldRightSensor)*td;
-			int powerLeft=kp*actLeftSensor+ki/ti*esum+kd*(actLeftSensor-oldLeftSensor)*td;
+			int powerRight=kp*deltaRightSensor+ki/ti*sumRightSensor+kd*(deltaRightSensor-oldRightSensor)*td;
+			int powerLeft=kp*deltaLeftSensor+ki/ti*sumLeftSensor+kd*(deltaLeftSensor-oldLeftSensor)*td;
+			//int powerRight=kp*actRightSensor+ki/ti*sumRightSensor+kd*(actRightSensor-oldRightSensor)*td;
+			//int powerRight=kp*actLeftSensor+ki/ti*sumLeftSensor+kd*(actLeftSensor-oldLeftSensor)*td;
 			
 			// set power for motors
 			leftMotor.setPower(powerLeft);
 			rightMotor.setPower(powerRight);
 			
 			// set new parameters
-			oldRightSensor=actRightSensor;
-			oldLeftSensor=actLeftSensor;
-			sumRightSensor=sumRightSensor+actRightSensor;
-			sumLeftSensor=sumLeftSensor+actLeftSensor;
+			deltaRightSensorOld=deltaRightSensor;
+			deltaLeftSensorOld=deltaLeftSensor;
+			//oldRightSensor=actRightSensor;
+			//oldLeftSensor=actLeftSensor;
+			sumRightSensor=sumRightSensor+deltaRightSensor;
+			sumLeftSensor=sumLeftSensor+deltaLeftSensor;
+			//sumRightSensor=sumRightSensor+actRightSensor;
+			//sumLeftSensor=sumLeftSensor+actLeftSensor;
+			
 			// ab hier Variante 2
 			// hier muessen die ranges festgelegt werden
 			/*
