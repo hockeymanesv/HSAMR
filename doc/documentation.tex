@@ -1,0 +1,36 @@
+\documentclass[11pt]{scrartcl}
+\usepackage{ucs}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+%ermöglicht Aufteilung in mehrer tex-files
+\usepackage{subfiles}
+\newcommand{\onlyinsubfile}[1]{#1}
+\newcommand{\notinsubfile}[1]{}
+%neue Seite für jeden Abschnitt
+\usepackage{titlesec}
+\newcommand{\sectionbreak}{\clearpage}
+\newcommand{\subsectionbreak}{\clearpage}
+%Titel, Autor und Datum
+\title{Robotikprojekt Autonomes Einparken}
+\author{Gruppe 9}
+\date{\today{}, Dresden}
+
+\begin{document}
+%Funktionen können ich child-files genutzt werden
+\renewcommand{\onlyinsubfile}[1]{}
+\renewcommand{\notinsubfile}[1]{#1}
+
+%Titelblatt und Inhaltsverzeichnis
+\maketitle
+\tableofcontents
+
+%child-files
+\subfile{tex/control}
+\subfile{tex/guidance}
+\subfile{tex/HMI}
+\subfile{tex/navigation}
+\subfile{tex/Perception}
+
+
+\end{document}
