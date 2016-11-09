@@ -44,9 +44,17 @@ public class GuidanceAT {
 	 */
 	public enum CurrentStatus {
 		/**
-		 * indicates that robot is following the line and maybe detecting parking slots
+		 * indicates that robot is following the line and detecting parking slots
 		 */
-		DRIVING,
+		SCOUT,
+		/**
+		 * indicates that robot is following the line to a special parking slot (ID) and park into this slot
+		 */
+		PARK_THIS,
+		/**
+		 * indicates that robot is following the line to the next parking slot and park into this slot
+		 */
+		PARK_NOW,
 		/**
 		 * indicates that robot is performing an parking maneuver
 		 */
@@ -120,13 +128,14 @@ public class GuidanceAT {
 			
         	switch ( currentStatus )
         	{
-				case DRIVING:
+				case SCOUT:
 					// MONITOR (example)
 //					monitor.writeGuidanceComment("Guidance_Driving");
 					
 					//Into action
-					if ( lastStatus != CurrentStatus.DRIVING ){
+					if ( lastStatus != CurrentStatus.SCOUT ){
 						control.setCtrlMode(ControlMode.LINE_CTRL);
+						navigation.setDetectionState(true);
 					}
 					
 					//While action				
@@ -149,10 +158,42 @@ public class GuidanceAT {
 					}
 					
 					//Leave action
-					if ( currentStatus != CurrentStatus.DRIVING ){
-						//nothing to do here
+					if ( currentStatus != CurrentStatus.SCOUT ){
+						navigation.setDetectionState(false);
 					}
-					break;				
+					break;	
+				case PARK_THIS:
+					//Into action
+					if ( lastStatus != CurrentStatus.PARK_THIS ){
+						//aktion die auszuführen ist
+					}
+					
+					//While action
+			
+					
+					//State transition check
+						
+					
+					//Leave action
+					
+					
+					break;
+				case PARK_NOW:
+					//Into action
+					if ( lastStatus != CurrentStatus.PARK_NOW ){
+						//aktion die auszuführen ist
+					}
+					
+					//While action
+			
+					
+					//State transition check
+						
+					
+					//Leave action
+					
+					
+					break;
 				case INACTIVE:
 					//Into action
 					if ( lastStatus != CurrentStatus.INACTIVE ){
@@ -167,9 +208,9 @@ public class GuidanceAT {
 					//State transition check
 					lastStatus = currentStatus;
 					if ( hmi.getMode() == parkingRobot.INxtHmi.Mode.SCOUT ){
-						currentStatus = CurrentStatus.DRIVING;						
+						currentStatus = CurrentStatus.SCOUT;						
 					}else if ( Button.ENTER.isDown() ){
-						currentStatus = CurrentStatus.DRIVING;
+						currentStatus = CurrentStatus.SCOUT;
 						while(Button.ENTER.isDown()){Thread.sleep(1);} //wait for button release
 					}else if ( Button.ESCAPE.isDown() ){
 						currentStatus = CurrentStatus.EXIT;
