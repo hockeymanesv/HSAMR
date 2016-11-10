@@ -1,0 +1,58 @@
+11-05 12:35:55.822: W/ResourceType(28748): Failure getting entry for 0x01080acf (t=7 e=2767) (error -75)
+11-05 12:35:55.842: D/PhoneWindow(28748): *FMB* installDecor mIsFloating : false
+11-05 12:35:55.842: D/PhoneWindow(28748): *FMB* installDecor flags : 1073807616
+11-05 12:35:55.872: D/PhoneWindow(28748): *FMB* isFloatingMenuEnabled mFloatingMenuBtn : null
+11-05 12:35:55.872: D/PhoneWindow(28748): *FMB* isFloatingMenuEnabled return false
+11-05 12:35:55.992: I/Timeline(28748): Timeline: Activity_idle id: android.os.BinderProxy@1ca98632 time:526846066
+11-05 12:36:16.182: D/ViewRootImpl(28748): ViewPostImeInputStage ACTION_DOWN
+11-05 12:36:16.227: I/Timeline(28748): Timeline: Activity_launch_request id:de.amr.plt.rcTestapp time:526866301
+11-05 12:36:16.292: W/ResourceType(28748): Failure getting entry for 0x01080acf (t=7 e=2767) (error -75)
+11-05 12:36:16.302: D/PhoneWindow(28748): *FMB* installDecor mIsFloating : false
+11-05 12:36:16.302: D/PhoneWindow(28748): *FMB* installDecor flags : 1073807616
+11-05 12:36:16.302: W/ResourceType(28748): Failure getting entry for 0x01080acf (t=7 e=2767) (error -75)
+11-05 12:36:16.302: W/ResourceType(28748): Failure getting entry for 0x01080acf (t=7 e=2767) (error -75)
+11-05 12:36:16.302: D/AbsListView(28748): Get MotionRecognitionManager
+11-05 12:36:16.337: D/PhoneWindow(28748): *FMB* isFloatingMenuEnabled mFloatingMenuBtn : null
+11-05 12:36:16.337: D/PhoneWindow(28748): *FMB* isFloatingMenuEnabled return false
+11-05 12:36:16.532: I/Timeline(28748): Timeline: Activity_idle id: android.os.BinderProxy@2ea4e8de time:526866609
+11-05 12:36:16.707: V/ActivityThread(28748): updateVisibility : ActivityRecord{3105d4d5 token=android.os.BinderProxy@1ca98632 {de.amr.plt.rcTestapp/de.amr.plt.rcTestapp.MainActivity}} show : false
+11-05 12:36:19.417: D/ViewRootImpl(28748): ViewPostImeInputStage ACTION_DOWN
+11-05 12:36:20.332: D/ViewRootImpl(28748): ViewPostImeInputStage ACTION_DOWN
+11-05 12:36:20.457: D/BluetoothAdapter(28748): cancelDiscovery
+11-05 12:36:20.457: D/BluetoothAdapter(28748): cancelDiscovery = true
+11-05 12:36:20.527: E/LeJOSDroid NXJ log:(28748): Protocols = 2
+11-05 12:36:20.527: E/LeJOSDroid NXJ log:(28748): Search Param = NXT
+11-05 12:36:20.562: E/LeJOSDroid NXJ log:(28748): Using Bluetooth device with address = 00:16:53:1B:DE:ED
+11-05 12:36:20.567: I/NXTCommAndroid >>>>(28748): BEGIN mConnectThread
+11-05 12:36:20.567: D/BluetoothUtils(28748): isSocketAllowedBySecurityPolicy start : device null
+11-05 12:36:20.572: W/BluetoothAdapter(28748): getBluetoothService() called with no BluetoothManagerCallback
+11-05 12:36:20.572: D/BluetoothSocket(28748): connect(), SocketState: INIT, mPfd: {ParcelFileDescriptor: FileDescriptor[43]}
+11-05 12:36:24.067: D/NXTCommAndroid >>>>(28748): Connection success -- is connected to NXT
+11-05 12:36:24.072: I/Choreographer(28748): Skipped 212 frames!  The application may be doing too much work on its main thread.
+11-05 12:36:24.122: I/Timeline(28748): Timeline: Activity_idle id: android.os.BinderProxy@1ca98632 time:526874198
+11-05 12:36:24.272: D/AndroidRuntime(28748): Shutting down VM
+11-05 12:36:24.277: E/AndroidRuntime(28748): FATAL EXCEPTION: main
+11-05 12:36:24.277: E/AndroidRuntime(28748): Process: de.amr.plt.rcTestapp, PID: 28748
+11-05 12:36:24.277: E/AndroidRuntime(28748): java.lang.NoClassDefFoundError: Failed resolution of: LparkingRobot/hsamr0/GuidanceAT$CurrentStatus;
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at de.amr.plt.rcTestapp.MainActivity$5$1.run(MainActivity.java:244)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at android.os.Handler.handleCallback(Handler.java:739)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at android.os.Handler.dispatchMessage(Handler.java:95)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at android.os.Looper.loop(Looper.java:145)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at android.app.ActivityThread.main(ActivityThread.java:6117)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at java.lang.reflect.Method.invoke(Native Method)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at java.lang.reflect.Method.invoke(Method.java:372)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:1399)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1194)
+11-05 12:36:24.277: E/AndroidRuntime(28748): Caused by: java.lang.ClassNotFoundException: Didn't find class "parkingRobot.hsamr0.GuidanceAT$CurrentStatus" on path: DexPathList[[zip file "/data/app/de.amr.plt.rcTestapp-1/base.apk"],nativeLibraryDirectories=[/vendor/lib, /system/lib]]
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:56)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at java.lang.ClassLoader.loadClass(ClassLoader.java:511)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	at java.lang.ClassLoader.loadClass(ClassLoader.java:469)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	... 9 more
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	Suppressed: java.lang.ClassNotFoundException: parkingRobot.hsamr0.GuidanceAT$CurrentStatus
+11-05 12:36:24.277: E/AndroidRuntime(28748): 		at java.lang.Class.classForName(Native Method)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 		at java.lang.BootClassLoader.findClass(ClassLoader.java:781)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 		at java.lang.BootClassLoader.loadClass(ClassLoader.java:841)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 		at java.lang.ClassLoader.loadClass(ClassLoader.java:504)
+11-05 12:36:24.277: E/AndroidRuntime(28748): 		... 10 more
+11-05 12:36:24.277: E/AndroidRuntime(28748): 	Caused by: java.lang.NoClassDefFoundError: Class not found using the boot class loader; no stack available
+11-05 12:36:24.822: I/Process(28748): Sending signal. PID: 28748 SIG: 9

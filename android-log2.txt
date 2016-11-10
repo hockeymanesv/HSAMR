@@ -1,0 +1,52 @@
+02-14 12:36:36.908: W/Trace(11561): error opening trace file: No such file or directory (2)
+02-14 12:36:36.932: W/dalvikvm(11561): VFY: unable to resolve static field 2962 (DISCONNECT) in LparkingRobot/INxtHmi$Mode;
+02-14 12:36:36.932: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x000c
+02-14 12:36:36.971: D/skia(11561): new locale de-Latn-DE
+02-14 12:36:37.041: W/dalvikvm(11561): VFY: unable to resolve static field 2964 (SCOUT) in LparkingRobot/INxtHmi$Mode;
+02-14 12:36:37.041: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x000c
+02-14 12:36:37.041: W/dalvikvm(11561): VFY: unable to resolve static field 2963 (PAUSE) in LparkingRobot/INxtHmi$Mode;
+02-14 12:36:37.041: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x001d
+02-14 12:37:13.768: W/dalvikvm(11561): VFY: unable to resolve static field 2967 (IN_SET_MODE) in LparkingRobot/hsamr0/HmiPLT$Command;
+02-14 12:37:13.768: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x000a
+02-14 12:37:13.776: W/dalvikvm(11561): VFY: unable to resolve static field 2966 (IN_SELECTED_PARKING_SLOT) in LparkingRobot/hsamr0/HmiPLT$Command;
+02-14 12:37:13.776: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x0048
+02-14 12:37:13.776: E/dalvikvm(11561): Could not find class 'parkingRobot.hsamr0.GuidanceAT$CurrentStatus', referenced from method de.amr.plt.rcParkingRobot.AndroidHmiPLT$StatusHandler.handleMessage
+02-14 12:37:13.776: W/dalvikvm(11561): VFY: unable to resolve check-cast 949 (LparkingRobot/hsamr0/GuidanceAT$CurrentStatus;) in Lde/amr/plt/rcParkingRobot/AndroidHmiPLT$StatusHandler;
+02-14 12:37:13.776: D/dalvikvm(11561): VFY: replacing opcode 0x1f at 0x0002
+02-14 12:37:13.783: E/LeJOSDroid NXJ log:(11561): Protocols = 2
+02-14 12:37:13.783: E/LeJOSDroid NXJ log:(11561): Search Param = NXT
+02-14 12:37:13.893: E/LeJOSDroid NXJ log:(11561): Using Bluetooth device with address = 00:16:53:1B:DE:ED
+02-14 12:37:13.908: I/NXTCommAndroid >>>>(11561): BEGIN mConnectThread
+02-14 12:37:13.908: W/BluetoothAdapter(11561): getBluetoothService() called with no BluetoothManagerCallback
+02-14 12:37:13.908: D/BluetoothSocket(11561): connect(), SocketState: INIT, mPfd: {ParcelFileDescriptor: FileDescriptor[48]}
+02-14 12:37:15.549: I/dalvikvm(11561): Could not find method parkingRobot.hsamr0.HmiPLT$Command.values, referenced from method de.amr.plt.rcParkingRobot.BTCommunicationThread.run
+02-14 12:37:15.549: D/NXTCommAndroid >>>>(11561): Connection success -- is connected to NXT
+02-14 12:37:15.549: W/dalvikvm(11561): VFY: unable to resolve static method 6553: LparkingRobot/hsamr0/HmiPLT$Command;.values ()[LparkingRobot/hsamr0/HmiPLT$Command;
+02-14 12:37:15.549: D/dalvikvm(11561): VFY: replacing opcode 0x71 at 0x0016
+02-14 12:37:15.549: W/dalvikvm(11561): VFY: unable to resolve static field 2969 (OUT_POSITION) in LparkingRobot/hsamr0/HmiPLT$Command;
+02-14 12:37:15.549: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x0034
+02-14 12:37:15.549: W/dalvikvm(11561): VFY: unable to resolve static field 2967 (IN_SET_MODE) in LparkingRobot/hsamr0/HmiPLT$Command;
+02-14 12:37:15.549: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x0004
+02-14 12:37:15.549: W/dalvikvm(11561): VFY: unable to resolve static field 2966 (IN_SELECTED_PARKING_SLOT) in LparkingRobot/hsamr0/HmiPLT$Command;
+02-14 12:37:15.549: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x0004
+02-14 12:37:15.549: I/dalvikvm(11561): DexOpt: unable to optimize static field ref 0x0b98 at 0x123 in Lde/amr/plt/rcParkingRobot/BTCommunicationThread;.run
+02-14 12:37:15.557: I/dalvikvm(11561): DexOpt: unable to optimize static field ref 0x0b9a at 0x18b in Lde/amr/plt/rcParkingRobot/BTCommunicationThread;.run
+02-14 12:37:15.557: I/Choreographer(11561): Skipped 105 frames!  The application may be doing too much work on its main thread.
+02-14 12:37:15.760: W/dalvikvm(11561): VFY: unable to resolve static field 2965 (EXIT) in LparkingRobot/hsamr0/GuidanceAT$CurrentStatus;
+02-14 12:37:15.760: D/dalvikvm(11561): VFY: replacing opcode 0x62 at 0x01e9
+02-14 12:37:15.760: D/AndroidRuntime(11561): Shutting down VM
+02-14 12:37:15.760: W/dalvikvm(11561): threadid=1: thread exiting with uncaught exception (group=0x40d5e930)
+02-14 12:37:15.768: E/AndroidRuntime(11561): FATAL EXCEPTION: main
+02-14 12:37:15.768: E/AndroidRuntime(11561): java.lang.NoClassDefFoundError: parkingRobot.hsamr0.GuidanceAT$CurrentStatus
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at de.amr.plt.rcTestapp.MainActivity$5$1.run(MainActivity.java:244)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at android.os.Handler.handleCallback(Handler.java:725)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at android.os.Handler.dispatchMessage(Handler.java:92)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at android.os.Looper.loop(Looper.java:137)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at android.app.ActivityThread.main(ActivityThread.java:5227)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at java.lang.reflect.Method.invokeNative(Native Method)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at java.lang.reflect.Method.invoke(Method.java:511)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:795)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:562)
+02-14 12:37:15.768: E/AndroidRuntime(11561): 	at dalvik.system.NativeStart.main(Native Method)
+02-14 12:37:16.291: W/dalvikvm(11561): threadid=13: thread exiting with uncaught exception (group=0x40d5e930)
+02-14 12:37:16.291: I/Process(11561): Sending signal. PID: 11561 SIG: 9

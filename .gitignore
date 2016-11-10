@@ -11,6 +11,10 @@ local.properties
 .loadpath
 .recommenders
 
+# NXT binaries
+NXT/GuidanceAT.nxj
+NXT/GuidanceAT.nxd
+
 # latex stuff
 doc/*.aux
 doc/*.log

@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+    
 
     <Button
         android:id="@+id/buttonSetupBluetooth"
@@ -242,5 +243,14 @@
         android:text="@string/togglebutton"
         android:textOff="SCOUT"
         android:textOn="SCOUT" />
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViewValueStatus"
+        android:layout_marginLeft="131dp"
+        android:layout_toRightOf="@+id/toggleMode"
+        android:text="Switch" />
 
 </RelativeLayout>

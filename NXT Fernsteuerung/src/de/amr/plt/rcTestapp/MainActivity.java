@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -83,6 +84,23 @@ public class MainActivity extends Activity {
     		    }
         	}
         });
+        final Switch paulsswitch = (Switch) findViewById(R.id.switch1);
+        paulsswitch.setEnabled(false);
+        paulsswitch.setOnClickListener(new OnClickListener() {
+        	public void onClick(View v){       		
+    		    boolean checked = ((Switch) v).isChecked();    		    
+    		    if (checked) {
+    		        //if toggle is checked change mode to SCOUT 
+    		    	hmiModule.setMode(Mode.SCOUT);
+    		    	Log.e("Toggle","Toggled to Scout");
+    		    } else{
+    		    	// otherwise change mode to PAUSE
+    		    	hmiModule.setMode(Mode.PAUSE); 
+    		    	Log.e("Toggle","Toggled to Pause");
+    		    }
+        	}
+        });
+        
         
     }
 
@@ -154,6 +172,9 @@ public class MainActivity extends Activity {
 				//enable toggle button
 				final ToggleButton toggleMode = (ToggleButton) findViewById(R.id.toggleMode);
 				toggleMode.setEnabled(true);
+				
+				final Switch paulsswitch = (Switch) findViewById(R.id.switch1);
+				paulsswitch.setEnabled(true);
 				
 				//disable connect button
 				final Button connectButton = (Button) findViewById(R.id.buttonSetupBluetooth);
