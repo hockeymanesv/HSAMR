@@ -369,7 +369,14 @@ public class ControlRST implements IControl {
 
 				// MONITOR (example)
 				monitor.writeControlComment("turn right");
+			} else if (this.lineSensorRight == 2 && this.lineSensorLeft ==2) {
+				leftMotor.setPower(highPower);
+				rightMotor.setPower(highPower);
+
+				// MONITOR (example)
+				monitor.writeControlComment("straight forward");
 			}
+				
 		} else if(version==1) {
 			
 			//desired values from perception
