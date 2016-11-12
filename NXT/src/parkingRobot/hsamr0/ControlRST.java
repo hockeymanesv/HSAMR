@@ -58,10 +58,23 @@ public class ControlRST implements IControl {
 	 */
 	int lineSensorLeftV = 0;
 	/**
-	 * sums of the measured sensor data for integral
+	 * sums of the measured sensor data for integral version 1
 	 */
-	static int sumRightSensor=0;
-	static int sumLeftSensor=0;
+	static int sumRightSensor = 0;
+	static int sumLeftSensor = 0;
+
+	/**
+	 * version 1
+	 */
+	int deltaRightSensorOld = 0;
+	int deltaLeftSensorOld = 0;
+
+	/**
+	 * version 2
+	 */
+	static double sume;
+	static double eold;
+	static double motorPower;
 
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
@@ -305,14 +318,16 @@ public class ControlRST implements IControl {
 	 */
 
 	private void exec_LINECTRL_ALGO() {
-		leftMotor.forward();
-		rightMotor.forward();
-		int version = 1; // 0 --> drei farbwerte (zickzack), 1--> PID
+		// leftMotor.forward();
+		// rightMotor.forward();
+		int version = 2; // 0 --> drei farbwerte (zickzack), 1--> PID
 
-		if (version == 0) { // Entscheidung je nach Version, ob zickzack oder PID
-			int lowPower = 5;// 15;
-			int midPower = 15;
-			int highPower = 35;// 40;
+		if (version == 0) { // Entscheidung je nach Version, ob zickzack oder
+							// PID
+			leftMotor.forward();
+			rightMotor.forward();
+			int lowPower = 3;
+			int highPower = 40;
 
 			// MONITOR (example)
 			monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeft);
@@ -321,7 +336,7 @@ public class ControlRST implements IControl {
 			if (this.lineSensorLeft == 2 && (this.lineSensorRight == 1)) {
 
 				// when left sensor is on the line, turn left
-				leftMotor.setPower(midPower);
+				leftMotor.setPower(lowPower);
 				rightMotor.setPower(highPower);
 
 				// MONITOR (example)
@@ -331,7 +346,7 @@ public class ControlRST implements IControl {
 
 				// when right sensor is on the line, turn right
 				leftMotor.setPower(highPower);
-				rightMotor.setPower(midPower);
+				rightMotor.setPower(lowPower);
 
 				// MONITOR (example)
 				monitor.writeControlComment("turn right");
@@ -355,7 +370,7 @@ public class ControlRST implements IControl {
 			} else if (this.lineSensorLeft == 1 && this.lineSensorRight == 0) {
 
 				// when left sensor is on the line, turn left
-				leftMotor.setPower(midPower);
+				leftMotor.setPower(lowPower);
 				rightMotor.setPower(highPower);
 
 				// MONITOR (example)
@@ -365,71 +380,81 @@ public class ControlRST implements IControl {
 
 				// when right sensor is on the line, turn right
 				leftMotor.setPower(highPower);
-				rightMotor.setPower(midPower);
+				rightMotor.setPower(lowPower);
 
 				// MONITOR (example)
 				monitor.writeControlComment("turn right");
-			} else if (this.lineSensorRight == 2 && this.lineSensorLeft ==2) {
+
+			} else if (this.lineSensorRight == 0 && this.lineSensorLeft == 0) {
 				leftMotor.setPower(highPower);
 				rightMotor.setPower(highPower);
 
 				// MONITOR (example)
 				monitor.writeControlComment("straight forward");
 			}
-				
-		} else if(version==1) {
-			
-			//desired values from perception
-			final int desBlackRight=29; 
-			final int desBlackLeft=33;
-			final int desGreyRight=44;
-			final int desGreyLeft=48;
-			final int desWhiteRight=59;
-			final int desWhiteLeft=63;
+
+		} else if (version == 1) {
+			leftMotor.forward();
+			rightMotor.forward();
+
+			// desired values from perception
+			final int desBlackRight = 29;
+			final int desBlackLeft = 33;
+			final int desGreyRight = 44;
+			final int desGreyLeft = 48;
+			final int desWhiteRight = 59;
+			final int desWhiteLeft = 63;
 			// parameters for PID
-			final int kp=1;
-			final int ki=1;
-			final int kd=1;
-			final int ti=1;
-			final int td=1;
+			final double kp = 0.1;
+			final double ti = 1;
+			final double td = 0;
 			// sensor values
-			int actRightSensor=0;
-			int actLeftSensor=0;
-			int oldRightSensor=0;
-			int oldLeftSensor=0;
-			actRightSensor=this.lineSensorRightV;
-			actLeftSensor=this.lineSensorLeftV;
-			
+			int actRightSensor = 0;
+			int actLeftSensor = 0;
+			int oldRightSensor = 0;
+			int oldLeftSensor = 0;
+			actRightSensor = this.lineSensorRightV;
+			actLeftSensor = this.lineSensorLeftV;
+
 			// differences
-			int deltaRightSensor=0;
-			int deltaLeftSensor=0;
-			int deltaRightSensorOld=0;
-			int deltaLeftSensorOld=0;
-			
+			int deltaRightSensor = 0;
+			int deltaLeftSensor = 0;
+			// int deltaRightSensorOld=0;
+			// int deltaLeftSensorOld=0;
+
 			// calculation delta light Sensors
-			deltaRightSensor=desBlackRight-actRightSensor;
-			deltaLeftSensor=desBlackLeft-actLeftSensor;
-			
+			deltaRightSensor = desWhiteRight - actRightSensor;
+			deltaLeftSensor = desWhiteLeft - actLeftSensor;
+
 			// PID
-			int powerRight=kp*deltaRightSensor+ki/ti*sumRightSensor+kd*(deltaRightSensor-oldRightSensor)*td;
-			int powerLeft=kp*deltaLeftSensor+ki/ti*sumLeftSensor+kd*(deltaLeftSensor-oldLeftSensor)*td;
-			//int powerRight=kp*actRightSensor+ki/ti*sumRightSensor+kd*(actRightSensor-oldRightSensor)*td;
-			//int powerRight=kp*actLeftSensor+ki/ti*sumLeftSensor+kd*(actLeftSensor-oldLeftSensor)*td;
-			
+			double powerRight = kp * deltaRightSensor + 1 / ti * sumRightSensor
+					+ (deltaRightSensorOld - deltaRightSensor) * td;
+			double powerLeft = kp * deltaLeftSensor + 1 / ti * sumLeftSensor
+					+ (deltaLeftSensorOld - deltaLeftSensor) * td;
+			// int
+			// powerRight=kp*actRightSensor+ki/ti*sumRightSensor+kd*(actRightSensor-oldRightSensor)*td;
+			// int
+			// powerRight=kp*actLeftSensor+ki/ti*sumLeftSensor+kd*(actLeftSensor-oldLeftSensor)*td;
+
 			// set power for motors
-			leftMotor.setPower(powerLeft);
-			rightMotor.setPower(powerRight);
-			
+			leftMotor.setPower((int) powerLeft);
+			rightMotor.setPower((int) powerRight);
+
 			// set new parameters
-			deltaRightSensorOld=deltaRightSensor;
-			deltaLeftSensorOld=deltaLeftSensor;
-			//oldRightSensor=actRightSensor;
-			//oldLeftSensor=actLeftSensor;
-			sumRightSensor=sumRightSensor+deltaRightSensor;
-			sumLeftSensor=sumLeftSensor+deltaLeftSensor;
-			//sumRightSensor=sumRightSensor+actRightSensor;
-			//sumLeftSensor=sumLeftSensor+actLeftSensor;
-			
+			deltaRightSensorOld = deltaRightSensor;
+			deltaLeftSensorOld = deltaLeftSensor;
+			// oldRightSensor=actRightSensor;
+			// oldLeftSensor=actLeftSensor;
+			if (sumRightSensor < 10) {
+				sumRightSensor = sumRightSensor + deltaRightSensor;
+			}
+			if (sumLeftSensor < 10) {
+				sumLeftSensor = sumLeftSensor + deltaLeftSensor;
+			}
+
+			// sumRightSensor=sumRightSensor+actRightSensor;
+			// sumLeftSensor=sumLeftSensor+actLeftSensor;
+
 			// ab hier Variante 2
 			// hier muessen die ranges festgelegt werden
 			/*
@@ -450,13 +475,46 @@ public class ControlRST implements IControl {
 			 * int Kp; int Ki; int Kd; int Tn; int Tv; static int esum; static
 			 * int ealt; int y;
 			 * 
-			 * esum = esum + e; 
-			 * y = Kp * e + Ki * 1/Ti * esum + Kd * (e – ealt)*Td; 
-			 * ealt = e;
+			 * esum = esum + e; y = Kp * e + Ki * 1/Ti * esum + Kd * (e –
+			 * ealt)*Td; ealt = e;
 			 * 
 			 * return y;
 			 * 
 			 */
+		} else if (version == 2) {
+			leftMotor.forward();
+			rightMotor.forward();
+
+			int actRightSensor = 0;
+			int actLeftSensor = 0;
+			int oldRightSensor = 0;
+			int oldLeftSensor = 0;
+
+			double powerLeft = 0;
+			double powerRight = 0;
+			actRightSensor = this.lineSensorRightV;
+			actLeftSensor = this.lineSensorLeftV;
+
+			// parameters for PID
+			final double kp = 0.5;
+			final double ti = 30;
+			final double td = 0;
+
+			// rechter - linker Sensor
+			double deltaBrightness = actRightSensor - actLeftSensor;
+			double e = deltaBrightness - motorPower;
+			double iandd = sume * 1 / ti + td * (eold - e);
+			motorPower = kp * e +sume*1/ti;// +iandd;
+			// betrag = abs()
+			eold = e;
+			sume = sume + e;
+
+			powerLeft = 30 - motorPower;
+			powerRight = 30 + motorPower;
+			// set power for motors
+			leftMotor.setPower((int) powerLeft);
+			rightMotor.setPower((int) powerRight);
+
 		}
 	}
 
