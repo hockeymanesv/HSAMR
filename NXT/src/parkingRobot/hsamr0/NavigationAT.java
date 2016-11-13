@@ -96,7 +96,19 @@ public class NavigationAT implements INavigation{
 	 * robot specific constant: distance between wheels
 	 */
 	static final double WHEEL_DISTANCE		= 	0.114; // only rough guess, to be measured exactly and maybe refined by experiments
-
+	
+	static final double FRONT_SENSOR_OFFSET			=	0;
+	static final double FRONT_SIDE_SENSOR_OFFSET	=	0;
+	static final double BACK_SENSOR_OFFSET			=	0;
+	static final double BACK_SIDE_SENSOR_OFFSET		=	0;
+	
+	static final double FRONT_SENSOR_OFFAXIS		=	0;
+	static final double FRONT_SIDE_SENSOR_OFFAXIS	=	0;
+	static final double BACK_SIDE_SENSOR_OFFAXIS	=	0;
+	static final double BACK_SENSOR_OFFAXIS			=	0;
+	
+	static final double MOUSE_SENSOR_OFFSET			=	0;
+	static final double MOUSE_SENSOR_OFFAXIS		=	0;
 	
 	/**
 	 * map array of line references, whose corresponding lines form a closed chain and represent the map of the robot course
@@ -235,6 +247,26 @@ public class NavigationAT implements INavigation{
 		
 		double deltaT       = ((double)this.angleMeasurementLeft.getDeltaT())/1000;
 		
+		double frontEffective			=	this.frontSensorDistance		+	FRONT_SENSOR_OFFSET;
+		double frontSideEffective		=	this.frontSideSensorDistance	+	FRONT_SIDE_SENSOR_OFFSET;
+		double backSideEffective		=	this.backSideSensorDistance		+	BACK_SIDE_SENSOR_OFFSET;
+		double backEffective			=	this.backSensorDistance			+	BACK_SENSOR_OFFSET;
+		
+		double distanceSideSensor		=	FRONT_SIDE_SENSOR_OFFAXIS		+	BACK_SIDE_SENSOR_OFFAXIS;
+		
+		double aTriangSS		=	0;
+		double aTriangFS		=	0;
+		double aTriangBS		=	0;
+		double xRobo			=	0;
+		double yRoboFront		=	0;
+		double yRoboFrontSide	=	0;
+		double yRoboBack		=	0;
+		double yRoboBackSide	=	0;
+		
+		double xResultMouse		=	0;
+		double yResultMouse		=	0;
+		double angleResultMouse	=	0;
+		
 		if (R.isNaN()) { //robot don't move
 			xResult			= this.pose.getX();
 			yResult			= this.pose.getY();
@@ -252,6 +284,23 @@ public class NavigationAT implements INavigation{
 			angleResult 	= this.pose.getHeading() + w * deltaT;
 		}
 		
+		if (frontSideEffective < 300 && backSideEffective < 300) {
+			aTriangSS		=	Math.atan((frontSideEffective - backSideEffective) / distanceSideSensor);
+			xRobo			=	backSideEffective + Math.tan(aTriangSS) * BACK_SIDE_SENSOR_OFFAXIS;
+			yRoboFront		=	frontEffective + Math.tan(90 + aTriangSS) * FRONT_SENSOR_OFFAXIS;
+			yRoboBack		=	backEffective  + Math.tan(aTriangSS) * BACK_SENSOR_OFFAXIS;
+		}
+		
+		if (frontEffective < 300 && frontSideEffective < 300) {
+			aTriangFS		=	90 + Math.atan((frontEffective-FRONT_SIDE_SENSOR_OFFAXIS) / (frontSideEffective - FRONT_SENSOR_OFFAXIS));
+			yRoboFrontSide		=	frontEffective + Math.tan(90 + aTriangSS) * FRONT_SENSOR_OFFAXIS;
+		}
+		
+		if (backEffective < 300 && backSideEffective < 300) {
+			aTriangBS		=	Math.atan((backSideEffective - BACK_SENSOR_OFFSET) / (backEffective - BACK_SIDE_SENSOR_OFFSET));
+			yRoboBackSide	=	backEffective  + Math.tan(aTriangSS) * BACK_SENSOR_OFFAXIS;
+		}
+
 		this.pose.setLocation((float)xResult, (float)yResult);
 		this.pose.setHeading((float)angleResult);		 
 	}
