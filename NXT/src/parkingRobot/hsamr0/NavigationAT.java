@@ -254,9 +254,12 @@ public class NavigationAT implements INavigation{
 		
 		double distanceSideSensor		=	FRONT_SIDE_SENSOR_OFFAXIS		+	BACK_SIDE_SENSOR_OFFAXIS;
 		
+		double aTriang			=	0;
 		double aTriangSS		=	0;
 		double aTriangFS		=	0;
 		double aTriangBS		=	0;
+		double nTriang			=	0;
+		double aTriangRech		=	0;
 		double xRobo			=	0;
 		double yRoboFront		=	0;
 		double yRoboFrontSide	=	0;
@@ -284,23 +287,65 @@ public class NavigationAT implements INavigation{
 			angleResult 	= this.pose.getHeading() + w * deltaT;
 		}
 		
-		if (frontSideEffective < 300 && backSideEffective < 300) {
-			aTriangSS		=	Math.atan((frontSideEffective - backSideEffective) / distanceSideSensor);
-			xRobo			=	backSideEffective + Math.tan(aTriangSS) * BACK_SIDE_SENSOR_OFFAXIS;
-			yRoboFront		=	frontEffective + Math.tan(90 + aTriangSS) * FRONT_SENSOR_OFFAXIS;
-			yRoboBack		=	backEffective  + Math.tan(aTriangSS) * BACK_SENSOR_OFFAXIS;
+		aTriangSS		=	Math.atan((frontSideEffective - backSideEffective) / distanceSideSensor);
+		aTriangFS		=	90 + Math.atan((frontEffective-FRONT_SIDE_SENSOR_OFFAXIS) / (frontSideEffective - FRONT_SENSOR_OFFAXIS));
+		aTriangBS		=	Math.atan((backSideEffective - BACK_SENSOR_OFFSET) / (backEffective - BACK_SIDE_SENSOR_OFFSET));
+		
+		while(0 <= angleResult && angleResult < 360){
+			angleResult	=	angleResult - 360;
 		}
 		
-		if (frontEffective < 300 && frontSideEffective < 300) {
-			aTriangFS		=	90 + Math.atan((frontEffective-FRONT_SIDE_SENSOR_OFFAXIS) / (frontSideEffective - FRONT_SENSOR_OFFAXIS));
-			yRoboFrontSide		=	frontEffective + Math.tan(90 + aTriangSS) * FRONT_SENSOR_OFFAXIS;
+		while(0 <= angleResult && angleResult < 360){
+			angleResult	=	angleResult + 360;
 		}
 		
-		if (backEffective < 300 && backSideEffective < 300) {
-			aTriangBS		=	Math.atan((backSideEffective - BACK_SENSOR_OFFSET) / (backEffective - BACK_SIDE_SENSOR_OFFSET));
-			yRoboBackSide	=	backEffective  + Math.tan(aTriangSS) * BACK_SENSOR_OFFAXIS;
+		for(int i = 0; i < 4; i++){
+			aTriangSS	=	aTriangSS + 90 * i;
+			aTriangFS	=	aTriangFS + 90 * i;
+			aTriangBS	=	aTriangBS + 90 * i;
+			
+			if(Math.abs(aTriangSS-angleResult)<15){
+				aTriang		=	aTriangSS;
+				nTriang		=	nTriang + 1;
+			}
+			if(Math.abs(aTriangFS-angleResult)<15){
+				aTriang		=	aTriangFS;
+				nTriang		=	nTriang + 1;
+			}
+			if(Math.abs(aTriangBS-angleResult)<15){
+				aTriang		=	aTriangBS;
+				nTriang		=	nTriang + 1;
+			}
+			aTriangRech		=	aTriang - 90 * nTriang;
 		}
-
+		
+		xRobo			=	backSideEffective + Math.tan(aTriangRech) * BACK_SIDE_SENSOR_OFFAXIS;
+		yRoboFront		=	frontEffective + Math.tan(90 + aTriangRech) * FRONT_SENSOR_OFFAXIS;
+		yRoboBack		=	backEffective  + Math.tan(aTriangRech) * BACK_SENSOR_OFFAXIS;
+		
+		if(nTriang > 0){
+			aTriang		=	aTriang / nTriang;
+			
+			if(345 < aTriang && aTriang < 15){															//Linie 1
+				
+			} else if(Math.abs(aTriang - 90) < 15 && xResult > 100){									//Linie 2
+				
+			} else if((Math.abs(aTriang - 180) < 15 && xResult > 150 && yResult > 45)){
+				
+			} else if(Math.abs(aTriang - 270) < 15 && Math.abs(xResult - 150) < 15){
+				
+			} else if(Math.abs(aTriang - 180) < 15 && Math.abs(xResult - 90) < 60){
+				
+			} else if(Math.abs(aTriang - 90) < 15 && Math.abs(xResult - 30) < 15){
+				
+			} else if(Math.abs(aTriang - 180) < 15 && Math.abs(xResult - 15) < 15){
+				
+			} else if(Math.abs(aTriang - 270) < 15 && Math.abs(xResult) < 15){
+				
+			}
+		}
+		
+		
 		this.pose.setLocation((float)xResult, (float)yResult);
 		this.pose.setHeading((float)angleResult);		 
 	}
