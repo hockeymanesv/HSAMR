@@ -72,10 +72,11 @@ public class ControlRST implements IControl {
 	/**
 	 * version 2
 	 */
-	static double sume = 0;
+	static double integralE = 0;
 	static double eold = 0;
 	static double motorPower = 0;
 	double deltaBrightnessOld = 0;
+	static double olde = 0;
 
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
@@ -321,7 +322,7 @@ public class ControlRST implements IControl {
 	private void exec_LINECTRL_ALGO() {
 		// leftMotor.forward();
 		// rightMotor.forward();
-		int version = 0; // 0 --> drei farbwerte (zickzack), 1--> PID
+		int version = 2; // 0 --> drei farbwerte (zickzack), 1--> PID
 
 		if (version == 0) { // Entscheidung je nach Version, ob zickzack oder
 							// PID
@@ -486,10 +487,12 @@ public class ControlRST implements IControl {
 			leftMotor.forward();
 			rightMotor.forward();
 
+			monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeft);
+			monitor.writeControlVar("RightSensor", "" + this.lineSensorRight);
+
+			// Variables
 			int actRightSensor = 0;
 			int actLeftSensor = 0;
-			int oldRightSensor = 0;
-			int oldLeftSensor = 0;
 
 			double powerLeft = 0;
 			double powerRight = 0;
@@ -498,22 +501,30 @@ public class ControlRST implements IControl {
 
 			// parameters for PID
 			final double kp = 0.5;
-			final double ti = 30;//45;
+			final double ti = 30;// 45;
 			final double td = 1;
+			final double t = 0.01; // wie gross ist t
 
 			// rechter - linker Sensor
 			double deltaBrightness = actRightSensor - actLeftSensor;
 			double e = deltaBrightness - deltaBrightnessOld;
-			double iandd = sume * 1 / ti + td * (eold - e);
-			motorPower = kp * e +sume*1/ti;
-			// betrag = abs()
-			eold = e;
-			sume = sume + e;
+			integralE = 1 / ti * (e + eold) / 2 * t;
+			// double diffe= td*(eold-e)/t;
+
+			// Motorpower berechnen
+
+			motorPower = kp * e + integralE; // PID-Regler
 
 			powerLeft = 30 - motorPower;
 			powerRight = 30 + motorPower;
+
+			// neue Variablenzuweisung
+			eold = e;
+			integralE += e;
+			deltaBrightnessOld = deltaBrightness;
+
 			// set power for motors
-			deltaBrightnessOld=deltaBrightness;
+
 			leftMotor.setPower((int) powerLeft);
 			rightMotor.setPower((int) powerRight);
 
