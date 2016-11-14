@@ -321,7 +321,7 @@ public class ControlRST implements IControl {
 	private void exec_LINECTRL_ALGO() {
 		// leftMotor.forward();
 		// rightMotor.forward();
-		int version = 2; // 0 --> drei farbwerte (zickzack), 1--> PID
+		int version = 0; // 0 --> drei farbwerte (zickzack), 1--> PID
 
 		if (version == 0) { // Entscheidung je nach Version, ob zickzack oder
 							// PID
@@ -498,7 +498,7 @@ public class ControlRST implements IControl {
 
 			// parameters for PID
 			final double kp = 0.5;
-			final double ti = 0.05;//45;
+			final double ti = 30;//45;
 			final double td = 1;
 
 			// rechter - linker Sensor
