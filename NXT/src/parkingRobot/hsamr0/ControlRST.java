@@ -72,9 +72,10 @@ public class ControlRST implements IControl {
 	/**
 	 * version 2
 	 */
-	static double sume;
-	static double eold;
-	static double motorPower;
+	static double sume = 0;
+	static double eold = 0;
+	static double motorPower = 0;
+	double deltaBrightnessOld = 0;
 
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
@@ -497,14 +498,14 @@ public class ControlRST implements IControl {
 
 			// parameters for PID
 			final double kp = 0.5;
-			final double ti = 30;
-			final double td = 0;
+			final double ti = 0.05;//45;
+			final double td = 1;
 
 			// rechter - linker Sensor
 			double deltaBrightness = actRightSensor - actLeftSensor;
-			double e = deltaBrightness - motorPower;
+			double e = deltaBrightness - deltaBrightnessOld;
 			double iandd = sume * 1 / ti + td * (eold - e);
-			motorPower = kp * e +sume*1/ti;// +iandd;
+			motorPower = kp * e +sume*1/ti;
 			// betrag = abs()
 			eold = e;
 			sume = sume + e;
@@ -512,6 +513,7 @@ public class ControlRST implements IControl {
 			powerLeft = 30 - motorPower;
 			powerRight = 30 + motorPower;
 			// set power for motors
+			deltaBrightnessOld=deltaBrightness;
 			leftMotor.setPower((int) powerLeft);
 			rightMotor.setPower((int) powerRight);
 

@@ -115,7 +115,7 @@ public class GuidanceAT {
 		IMonitor monitor = new Monitor();
 		
 		IPerception perception = new PerceptionPMP(leftMotor, rightMotor, monitor);
-		//perception.calibrateLineSensors();
+		perception.calibrateLineSensors();
 		
 		INavigation navigation = new NavigationAT(perception, monitor);
 		IControl    control    = new ControlRST(perception, navigation, leftMotor, rightMotor, monitor);
