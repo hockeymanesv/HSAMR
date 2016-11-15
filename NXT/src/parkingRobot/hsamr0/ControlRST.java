@@ -77,7 +77,14 @@ public class ControlRST implements IControl {
 	static double motorPower = 0;
 	double deltaBrightnessOld = 0;
 	static double olde = 0;
+	static double outgoingPID=0;
 
+	/**
+	 * Version 3
+	 */
+
+	
+	
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
 
@@ -500,20 +507,20 @@ public class ControlRST implements IControl {
 			actLeftSensor = this.lineSensorLeftV;
 
 			// parameters for PID
-			final double kp = 0.5;
-			final double ti = 30;// 45;
+			final double kp = 0.6;
+			final double ti = 10 ;// 45;
 			final double td = 1;
-			final double t = 0.01; // wie gross ist t
+			// final double t = 0.01; // wie gross ist t
 
 			// rechter - linker Sensor
 			double deltaBrightness = actRightSensor - actLeftSensor;
 			double e = deltaBrightness - deltaBrightnessOld;
-			integralE = 1 / ti * (e + eold) / 2 * t;
-			double diffE = td * (eold - e) / t;
+			integralE = integralE+e;
+			double diffE = td * (e - eold);
 
 			// Motorpower berechnen
 
-			motorPower = kp * e + integralE;// +diffE; // PID-Regler
+			motorPower = kp * e + 1/ti*integralE;// + integralE;// +diffE; // PID-Regler
 
 			powerLeft = 30 - motorPower;
 			powerRight = 30 + motorPower;
@@ -528,7 +535,54 @@ public class ControlRST implements IControl {
 			leftMotor.setPower((int) powerLeft);
 			rightMotor.setPower((int) powerRight);
 
+		} else if (version==3) {
+			leftMotor.forward();
+			rightMotor.forward();
+
+			monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeft);
+			monitor.writeControlVar("RightSensor", "" + this.lineSensorRight);
+
+			// Variables
+			int actRightSensor = 0;
+			int actLeftSensor = 0;
+			
+			double powerOffset=30;
+			double powerLeft = 0;
+			double powerRight = 0;
+			actRightSensor = this.lineSensorRightV;
+			actLeftSensor = this.lineSensorLeftV;
+
+			// parameters for PID
+			final double kp = 0.5;
+			final double ti = 10 ;// 45;
+			final double td = 1;
+			// final double t = 0.01; // wie gross ist t
+
+			// rechter - linker Sensor
+			double deltaBrightness = actRightSensor - actLeftSensor;
+			double e = -deltaBrightness;
+			integralE = integralE+e;
+			double diffE = td * (e - eold);
+
+			// Motorpower berechnen
+
+			outgoingPID = kp * e;// + 1/ti*integralE;// + integralE;// +diffE; // PID-Regler
+			
+			powerLeft = powerOffset - motorPower;
+			powerRight = powerOffset + motorPower;
+
+			// neue Variablenzuweisung
+			eold = e;
+			integralE += e;
+			deltaBrightnessOld = deltaBrightness;
+
+			// set power for motors
+
+			leftMotor.setPower((int) powerLeft);
+			rightMotor.setPower((int) powerRight);
+
 		}
+		
 	}
 
 	private void stop() {
@@ -550,25 +604,31 @@ public class ControlRST implements IControl {
 		// defining variables
 		double powerLeft = 0;
 		double powerRight = 0;
-		double r = v / omega;
 		double wheelDistance = 101; // Radabstand in mm;
 
-		// calculating vRight and vLeft
-		double rLeft = r - wheelDistance / 2;
-		double rRight = r + wheelDistance / 2;
-
 		if (omega == 0) {
+			// geradeaus fahren
 			powerLeft = v;
 			powerRight = v;
 
 		} else if (v == 0) {
-			powerLeft = 0;//-30 //nicht richtig
-			powerRight = 0;//30; //vielleicht richtig
+			// nur drehen
+			// rechts oder links
+			powerLeft = 0;// -30 //nicht richtig
+			powerRight = 0;// 30; //vielleicht richtig
 
 		} else if (omega != 0 && v != 0) {
+			// normaler Betriebsmodus
+			// calculating extensions
+			double r = v / omega;
+			double rLeft = r - wheelDistance / 2;
+			double rRight = r + wheelDistance / 2;
+
+			// calculating powers
 			powerLeft = rLeft * v / r;
 			powerRight = rRight * v / r;
-		} else if (omega == 0 && v==0) {
+		} else if (omega == 0 && v == 0) {
+			// stopp
 			powerLeft = 0;
 			powerRight = 0;
 		}
