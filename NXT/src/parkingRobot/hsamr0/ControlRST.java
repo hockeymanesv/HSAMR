@@ -509,11 +509,11 @@ public class ControlRST implements IControl {
 			double deltaBrightness = actRightSensor - actLeftSensor;
 			double e = deltaBrightness - deltaBrightnessOld;
 			integralE = 1 / ti * (e + eold) / 2 * t;
-			// double diffe= td*(eold-e)/t;
+			double diffE = td * (eold - e) / t;
 
 			// Motorpower berechnen
 
-			motorPower = kp * e + integralE; // PID-Regler
+			motorPower = kp * e + integralE;// +diffE; // PID-Regler
 
 			powerLeft = 30 - motorPower;
 			powerRight = 30 + motorPower;
@@ -547,5 +547,36 @@ public class ControlRST implements IControl {
 	 */
 	private void drive(double v, double omega) {
 		// Aufgabe 3.2
+		// defining variables
+		double powerLeft = 0;
+		double powerRight = 0;
+		double r = v / omega;
+		double wheelDistance = 101; // Radabstand in mm;
+
+		// calculating vRight and vLeft
+		double rLeft = r - wheelDistance / 2;
+		double rRight = r + wheelDistance / 2;
+
+		if (omega == 0) {
+			powerLeft = v;
+			powerRight = v;
+
+		} else if (v == 0) {
+			powerLeft = 0;//-30 //nicht richtig
+			powerRight = 0;//30; //vielleicht richtig
+
+		} else if (omega != 0 && v != 0) {
+			powerLeft = rLeft * v / r;
+			powerRight = rRight * v / r;
+		} else if (omega == 0 && v==0) {
+			powerLeft = 0;
+			powerRight = 0;
+		}
+
+		// set power for motors
+		leftMotor.forward();
+		rightMotor.forward();
+		leftMotor.setPower((int) powerLeft);
+		rightMotor.setPower((int) powerRight);
 	}
 }
