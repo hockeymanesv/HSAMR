@@ -553,20 +553,23 @@ public class ControlRST implements IControl {
 
 			// parameters for PID
 			final double kp = 0.1;
-			final double ti = 10;// 45;
+			final double ti = 150;// 45;
 			final double td = 1;
 			// final double t = 0.01; // wie gross ist t
 
 			// rechter - linker Sensor
 			double deltaBrightness = actRightSensor - actLeftSensor;
 			double e = 0 - deltaBrightness;
-			integralE = integralE + e;
 			double diffE = td * (e - eold);
 
+			// I-Anteil berechnen
+			if (integralE<=30){
+			integralE = integralE + e;
+			}
 			// Motorpower berechnen
 
-			outgoingPID = kp * e;// + 1/ti*integralE;// + integralE;// +diffE;
-									// // PID-Regler
+			outgoingPID = kp * e + 1 / ti * integralE; // PID-Regler
+			 
 
 			powerLeft = powerOffset + outgoingPID;
 			powerRight = powerOffset - outgoingPID;
