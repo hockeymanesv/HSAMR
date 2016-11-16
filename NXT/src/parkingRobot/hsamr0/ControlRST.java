@@ -576,9 +576,7 @@ public class ControlRST implements IControl {
 
 			// neue Variablenzuweisung
 			eold = e;
-			integralE += e;
-			deltaBrightnessOld = deltaBrightness;
-
+			
 			// set power for motors
 
 			leftMotor.setPower((int) powerLeft);
