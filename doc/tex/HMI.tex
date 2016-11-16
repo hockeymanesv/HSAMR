@@ -30,10 +30,19 @@
 \item Ausparken soll automatisch mit scout-Modus aktiviert werden
 \end{itemize}
 
-\subsection{Weiteres Kapitel}
-\label{sec:weitereskapitel}
+\subsection{Material-Design unter Android 4}
+\label{sec:materialdesignunterandroid4}
 
-Hallo
+Material Design wurde erst mit Android 5 unter der API 25 eingeführt. Damit wir Material Design nutzen können, müssen Support Libraries nach installiert werden.
+
+Ab hier durch klicken https://developer.android.com/training/basics/supporting-devices/platforms.html
+
+Die Installation der Bibliotheken erwies sich als durchaus problematisch, da Eclipse ewig nicht mehr unterstützt wird.
+Ich habe folgendes Repo geklont https://github.com/koush/android-support-v7-appcompat und importiert. Dann als "is Library" markiert und in mein Projekt importiert.
+
+Hat alles nicht geklapt. Bin jetzt auf Android Studio umgestiegen. Dafür habe ich die NXT Datein mit einem Hardlink in das AndroidStudioProjekt gepackt /usr/local/Cellar/hardlink-osx/0.1.1/bin/hln ~/Documents/code/HSAMR/NXT/src/parkingRobot/ ~/AndroidStudioProjects/NXT\ Fernsteuerung/nXT/src/main/java/parkingRobot
+
+
 
 
 \end{document}

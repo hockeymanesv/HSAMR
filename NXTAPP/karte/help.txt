@@ -1,0 +1,2 @@
+##Befehl der funktioniert:
+convert ~/Documents/code/HSAMR/NXTAPP/karte/karte.png -crop 256x256 -set filename:tile '%[fx:page.x/256]_%[fx:page.y/256]' +repage +adjoin ~/Documents/code/HSAMR/NXTAPP/karte/tile-%[filename:tile].png
