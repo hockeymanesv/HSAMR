@@ -327,7 +327,7 @@ public class ControlRST implements IControl {
 	private void exec_LINECTRL_ALGO() {
 		// leftMotor.forward();
 		// rightMotor.forward();
-		int version = 3; // 0 --> drei farbwerte (zickzack), 1--> PID
+		int version = 3; // 0 --> drei farbwerte (zickzack), 1--> PID version 1, 2 --> PID version 2, 3 --> PID version 3 best working
 
 		if (version == 0) { // Entscheidung je nach Version, ob zickzack oder
 							// PID
