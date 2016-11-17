@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/TileView-master/demo" />
             <option value="$PROJECT_DIR$/TileView-master/tileview" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/nXT" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

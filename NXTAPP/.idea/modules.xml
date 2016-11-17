@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/NXTAPP.iml" filepath="$PROJECT_DIR$/NXTAPP.iml" />
+      <module fileurl="file://$PROJECT_DIR$/NXTApp.iml" filepath="$PROJECT_DIR$/NXTApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/TileView-master/demo/demo.iml" filepath="$PROJECT_DIR$/TileView-master/demo/demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nXT/nXT.iml" filepath="$PROJECT_DIR$/nXT/nXT.iml" />
       <module fileurl="file://$PROJECT_DIR$/TileView-master/tileview/tileview.iml" filepath="$PROJECT_DIR$/TileView-master/tileview/tileview.iml" />
     </modules>
   </component>
