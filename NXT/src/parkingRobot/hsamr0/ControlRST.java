@@ -545,7 +545,7 @@ public class ControlRST implements IControl {
 			int actRightSensor = 0;
 			int actLeftSensor = 0;
 
-			double powerOffset = 30;
+			double powerOffset = 30;//30
 			double powerLeft = 0;
 			double powerRight = 0;
 			actRightSensor = this.lineSensorRightV;
@@ -553,7 +553,7 @@ public class ControlRST implements IControl {
 
 			// parameters for PID
 			final double kp = 0.1;
-			final double ti = 150;// 45;
+			final double ti = 200;//200;// 45;
 			final double td = 1;
 			// final double t = 0.01; // wie gross ist t
 
