@@ -8,7 +8,6 @@ import parkingRobot.IPerception.*;
 import lejos.nxt.NXTMotor;
 import parkingRobot.INavigation;
 import java.lang.Math;
-//import Jama.Matrix;
 
 /**
  * Main class for control module setting start parameters
@@ -525,8 +524,6 @@ public class ControlRST implements IControl {
 																										// rad
 		double tIst = controlLeftEncoder.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
 																						// in
-																						// s
-																						// //
 																						// s
 		double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*mm
 	}
