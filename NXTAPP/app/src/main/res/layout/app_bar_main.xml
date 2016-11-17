@@ -31,4 +31,19 @@
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
+    <ToggleButton
+        android:id="@+id/toggleMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/buttonSetupBluetooth"
+        android:layout_alignBottom="@+id/buttonSetupBluetooth"
+        android:layout_marginLeft="24dp"
+        android:layout_toRightOf="@+id/buttonSetupBluetooth"
+        android:onClick="onToggleClicked"
+        android:text="@string/togglebutton"
+        android:textOff="SCOUT"
+        android:textOn="SCOUT"
+        app:layout_anchorGravity="center_vertical|center_horizontal"
+        android:layout_gravity="bottom|left" />
+
 </android.support.design.widget.CoordinatorLayout>
