@@ -91,8 +91,8 @@ public class ControlRST implements IControl {
 	int rightMotorPower = 0;
 
 	// Speed parameters
-	double velocity = 0.0;
-	double angularVelocity = 0.0;
+	double velocity = 0;//3;//0
+	double angularVelocity = 0;//3;//0
 
 	// Position parameters
 	Pose startPosition = new Pose();
