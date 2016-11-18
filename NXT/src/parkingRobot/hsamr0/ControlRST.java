@@ -65,23 +65,21 @@ public class ControlRST implements IControl {
 	static int sumLeftSensor = 0;
 
 	/**
-	 * version 1
-	 */
-	int deltaRightSensorOld = 0;
-	int deltaLeftSensorOld = 0;
-
-	/**
-	 * version 2
-	 */
-	static double sume;
-	static double eold;
-	static double motorPower;
-
-	/**
 	 * version 3
 	 */
 	static double integralE = 0;
-
+	static double eold;
+	
+	/**
+	 * for vw control
+	 */
+	double wheelDiameter = 500; //mm //genau nachmessen
+	static double integralERightWheel=0;
+	static double integralELeftWheel=0;
+	static double eoldRightWheel=0;
+	static double eoldLeftWheel=0;
+	
+	// motors
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
 
@@ -114,9 +112,6 @@ public class ControlRST implements IControl {
 	// Distance
 	double currentDistance = 0.0;
 	double Distance = 0.0;
-
-	// Diameter mm
-	double wheelDiameter = 500;
 
 	/**
 	 * provides the reference transfer so that the class knows its corresponding
@@ -508,24 +503,36 @@ public class ControlRST implements IControl {
 		rightMotor.setPower((int) powerRight);
 	}
 
-	private void controlRightWheel() {
-		double phiIst = controlRightEncoder.getEncoderMeasurement().getAngleSum() * 2 * Math.PI / 360; // Umrechnung
+	private void controlRightWheel(double vSoll) {
+		//		variables
+		double kp=1;
+		double ti=1;
+		double td=1;
+		
+		double phiIst = Math.toDegrees(controlRightEncoder.getEncoderMeasurement().getAngleSum()); // Umrechnung
 																										// in
 																										// rad
 		double tIst = controlRightEncoder.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
 																						// in
 																						// s
 		double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*mm
+		double e=vSoll-vIst;
+		integralERightWheel +=e;
+		
+		
+		// PID
+		double outgoingPID=kp*e+1/ti*integralERightWheel+td*(e-eoldRightWheel);
+		
 	}
 
-	private void controlLeftWheel() {
-		double phiIst = controlLeftEncoder.getEncoderMeasurement().getAngleSum() * 2 * Math.PI / 360; // Umrechnung
+	private void controlLeftWheel(double vSoll) {
+		double phiIst = Math.toDegrees(controlLeftEncoder.getEncoderMeasurement().getAngleSum()); // Umrechnung
 																										// in
 																										// rad
 		double tIst = controlLeftEncoder.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
 																						// in
 																						// s
 		double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*mm
+		double e=vSoll-vIst;
 	}
-
 }
