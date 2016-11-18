@@ -299,6 +299,7 @@ public class GuidanceAT {
 	 * gleich 45°
 	 * 
 	 */
+	/*
 	private double[][] koeffizientenberechnung(double lueckenbreite, double lueckentiefe) {
 	
 //	double lueckenbreite = 180;
@@ -321,5 +322,5 @@ public class GuidanceAT {
 	Matrix x = A.solve(b);
 
 	return x.getArray();
-	}
+	}*/
 }
