@@ -401,41 +401,47 @@ public class ControlRST implements IControl {
 			}
 
 		} else if (version == 3) {
-
+			double powerLeft=0;
+			double powerRight=0;
+			double powerOffset = 50;// 30
+			if(this.lineSensorLeftV>=50 && this.lineSensorRight>=50) {
+				powerRight=0;
+				powerLeft=20;
+			} else {
 			monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeft);
 			monitor.writeControlVar("RightSensor", "" + this.lineSensorRight);
 
 			// Variables
-			double powerOffset = 50;// 30
+			
 
 			int actRightSensor = this.lineSensorRightV;
 			int actLeftSensor = this.lineSensorLeftV;
 			// parameters for PID
 			final double kp = 0.2;
-			final double ki = 0.003;
-			final double td = 0.25;
+			final double ki = 0.003;//0.003;
+			final double td = 0;//0.25;
 
 			double deltaBrightness = actRightSensor - actLeftSensor;
 			double e = 0 - deltaBrightness;
 
 			double diffE = td * (e - eold);
-			if (integralE <= 40) {
-				integralE = integralE + e;
-			}
+//			if (integralE <= 40) {
+//				integralE = integralE + e;
+//			}
 
 			// Motorpower berechnen
 			double outgoingPID = kp * e + td * diffE + ki * integralE; // PID-Regler
 
-			double powerLeft = powerOffset + outgoingPID;
-			double powerRight = powerOffset - outgoingPID;
+			powerLeft = powerOffset + outgoingPID;
+			powerRight = powerOffset - outgoingPID;
 
 			// neue Variablenzuweisung
 			eold = e;
-
+			}
 			// set power for motors
 			leftMotor.forward();
 			rightMotor.forward();
-
+			
 			leftMotor.setPower((int) powerLeft);
 			rightMotor.setPower((int) powerRight);
 
