@@ -411,7 +411,7 @@ public class ControlRST implements IControl {
 			int actRightSensor = this.lineSensorRightV;
 			int actLeftSensor = this.lineSensorLeftV;
 			// parameters for PID
-			final double kp = 0.25;
+			final double kp = 0.2;
 			final double ki = 0.003;
 			final double td = 0.25;
 
