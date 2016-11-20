@@ -255,17 +255,22 @@ public class NavigationAT implements INavigation{
 		double distanceSideSensor		=	FRONT_SIDE_SENSOR_OFFAXIS		+	BACK_SIDE_SENSOR_OFFAXIS;
 		
 		double aTriangSS		=	0;
-		double aTriangFS		=	0;
-		double aTriangBS		=	0;
 		double xRobo			=	0;
 		double yRoboFront		=	0;
-		double yRoboFrontSide	=	0;
 		double yRoboBack		=	0;
+		double xRoboTrue			 ;
+		double yRoboTrueFront		 ;
+		double yRoboTrueBack		 ;
+		/*
+		double aTriangFS		=	0;
+		double aTriangBS		=	0;
+		double yRoboFrontSide	=	0;
 		double yRoboBackSide	=	0;
 		
 		double xResultMouse		=	0;
 		double yResultMouse		=	0;
 		double angleResultMouse	=	0;
+		*/
 		
 		if (R.isNaN()) { //robot don't move
 			xResult			= this.pose.getX();
@@ -284,13 +289,23 @@ public class NavigationAT implements INavigation{
 			angleResult 	= this.pose.getHeading() + w * deltaT;
 		}
 		
-		if (frontSideEffective < 300 && backSideEffective < 300) {
-			aTriangSS		=	Math.atan((frontSideEffective - backSideEffective) / distanceSideSensor);
-			xRobo			=	backSideEffective + Math.tan(aTriangSS) * BACK_SIDE_SENSOR_OFFAXIS;
-			yRoboFront		=	frontEffective + Math.tan(90 + aTriangSS) * FRONT_SENSOR_OFFAXIS;
-			yRoboBack		=	backEffective  + Math.tan(aTriangSS) * BACK_SENSOR_OFFAXIS;
+		while (angleResult > 360) {
+			angleResult		= angleResult - 360;
 		}
 		
+		while (angleResult < 360) {
+			angleResult		= angleResult + 360;
+		}
+		
+		
+		aTriangSS		=	Math.atan((frontSideEffective - backSideEffective) / distanceSideSensor);
+		xRobo			=	backSideEffective + Math.tan(aTriangSS) * BACK_SIDE_SENSOR_OFFAXIS;
+		yRoboFront		=	frontEffective + Math.tan(90 + aTriangSS) * FRONT_SENSOR_OFFAXIS;
+		yRoboBack		=	backEffective  + Math.tan(aTriangSS) * BACK_SENSOR_OFFAXIS;
+		xRoboTrue		=	xRobo * Math.cos(aTriangSS);
+		yRoboTrueFront	=	yRoboFront * Math.cos(aTriangSS);
+		yRoboTrueBack	=	yRoboBack * Math.cos(aTriangSS);
+		/*
 		if (frontEffective < 300 && frontSideEffective < 300) {
 			aTriangFS		=	90 + Math.atan((frontEffective-FRONT_SIDE_SENSOR_OFFAXIS) / (frontSideEffective - FRONT_SENSOR_OFFAXIS));
 			yRoboFrontSide		=	frontEffective + Math.tan(90 + aTriangSS) * FRONT_SENSOR_OFFAXIS;
@@ -300,6 +315,25 @@ public class NavigationAT implements INavigation{
 			aTriangBS		=	Math.atan((backSideEffective - BACK_SENSOR_OFFSET) / (backEffective - BACK_SIDE_SENSOR_OFFSET));
 			yRoboBackSide	=	backEffective  + Math.tan(aTriangSS) * BACK_SENSOR_OFFAXIS;
 		}
+		*/
+		if (angleResult < 15 && angleResult > 345 && yResult < 15 && xResult > 15 && xResult < 165) {
+			yResult			= 0;
+		}
+		
+		if (angleResult < 105 && angleResult > 75 && xResult > 15 && yResult > 15 && yResult < 45) {
+			xResult			= 180;
+		}
+		
+		if (angleResult < 195 && angleResult > 165 && yResult > 15 && xResult > 30 && yResult < 150) {
+			yResult			= 30;
+		}
+		
+		if (angleResult < 285 && angleResult > 255 && xResult < 15 && yResult > 15 && yResult < 45) {
+			xResult			= xRoboTrue - 20;
+			yResult			= (yRoboTrueFront - 20 + (80 - yRoboTrueBack)) / 2;
+			angleResult		= aTriangSS + 270;
+		}
+		
 
 		this.pose.setLocation((float)xResult, (float)yResult);
 		this.pose.setHeading((float)angleResult);		 
