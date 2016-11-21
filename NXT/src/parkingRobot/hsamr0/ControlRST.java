@@ -77,8 +77,8 @@ public class ControlRST implements IControl {
 	static double eoldLeftMotor = 0;
 	static double integralERightMotor = 0;
 	static double integralELeftMotor = 0;
-	boolean schalterR = false;
-	boolean schalterL = false;
+	static boolean schalterR = false;
+	static boolean schalterL = false;
 	// Motors
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
@@ -94,7 +94,7 @@ public class ControlRST implements IControl {
 
 	// Speed parameters
 	double velocity = 15 * 3.6;// 3;//0 //in cm/s
-	double angularVelocity = -400;// 3;//0
+	double angularVelocity = 400;// 3;//0
 
 	// Position parameters
 	Pose startPosition = new Pose();
@@ -407,7 +407,7 @@ public class ControlRST implements IControl {
 		} else if (version == 3) {
 			double powerLeft = 0;
 			double powerRight = 0;
-			double powerOffset = 30;// 30
+			double powerOffset = 50;// 30
 			// if(this.lineSensorLeft==0 && this.lineSensorRight==0) {
 			// powerRight=-20;
 			// powerLeft=0;
@@ -422,10 +422,11 @@ public class ControlRST implements IControl {
 			int actRightSensor = this.lineSensorRightV;
 			int actLeftSensor = this.lineSensorLeftV;
 			// parameters for PID
-			// Werte fuer schwarz: 0.2,0.003,0.2
-			final double kp = 0.2;// 0.2
-			final double ki = 0.0015;// 0.0015//0.003;
-			final double td = 0.05;// 0.05//0.2;
+			// Werte fuer schwarz: 0.1 (0.08) ,0.003,0.25
+			// Werte fuer weiss: 0.2,0.0015,0.05
+			final double kp = 0.08;// 0.2
+			final double ki = 0.003;// 0.0015//0.003;
+			final double td = 0.25;// 0.05//0.2;
 
 			double deltaBrightness = actRightSensor - actLeftSensor;
 			double e = 0 - deltaBrightness;
@@ -474,23 +475,31 @@ public class ControlRST implements IControl {
 		// Aufgabe 3.2
 
 		// defining variables
-//		double velocityLeft = 0;
-//		double velocityRight = 0;
+		// double velocityLeft = 0;
+		// double velocityRight = 0;
 		double wheelDistance = 0.101; // Radabstand in m
 
 		double velocityLeft = (v - wheelDistance * omega / 2);
 		double velocityRight = (v + wheelDistance * omega / 2);
+
+		//TEST
+		double phiIst = Math.toRadians(this.encoderRight.getEncoderMeasurement().getAngleSum());
+		long tIst = this.encoderRight.getEncoderMeasurement().getDeltaT()/1000;
+		double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*m
 		
+		monitor.writeControlVar("LeftSensor", "" + tIst);
+		monitor.writeControlVar("RightSensor", "" + vIst);
+
 		// set power for motors
 		leftMotor.forward();
 		rightMotor.forward();
 
 		// Uebergabe an control Funktionen zur Regelung der Motoren
-//		rightMotor.setPower((int) (velocityRight));
-//		leftMotor.setPower((int) (velocityLeft));
+		rightMotor.setPower((int) (velocityRight));
+		leftMotor.setPower((int) (velocityLeft));
 
-		 rightMotor.setPower(controlRightMotor(velocityRight));
-		 leftMotor.setPower(controlLeftMotor(velocityLeft));
+//		rightMotor.setPower(controlRightMotor(velocityRight));
+//		leftMotor.setPower(controlLeftMotor(velocityLeft));
 
 	}
 
@@ -505,35 +514,35 @@ public class ControlRST implements IControl {
 	 */
 	private int controlRightMotor(double vSoll) {
 		if (schalterR == false) {
+			rightMotor.setPower(30);
+			leftMotor.setPower(30);
 			schalterR = true;
-			return 30;
-		} else {
-			double factorVPower = 0.34; // Umrechnung in Power Wert mit:
-										// velocity/factor=power
-
-			double phiIst = Math.toRadians(this.encoderRight.getEncoderMeasurement().getAngleSum()); // Umrechnung
-																										// in
-																										// rad
-			double tIst = this.encoderRight.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
-																						// in
-																						// s
-			double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*m
-			double e = vSoll - vIst;
-			integralERightMotor += e;
-
-			// Regler
-			double kp = 1;
-			double ki = 0;
-			double td = 0;
-			double outgoingPID = kp * e + ki * integralERightMotor + td * (e - eoldRightMotor);
-			eoldRightMotor = e;
-
-			double powerCalculated = (vSoll + outgoingPID) / factorVPower; // Umrechnung
-																			// in
-																			// Power-Wert
-			return (int) (powerCalculated);
-
 		}
+		double factorVPower = 0.34; // Umrechnung in Power Wert mit:
+									// velocity/factor=power
+
+		double phiIst = Math.toRadians(this.encoderRight.getEncoderMeasurement().getAngleSum()); // Umrechnung
+																									// in
+																									// rad
+		double tIst = this.encoderRight.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
+																					// in
+																					// s
+		double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*m
+		double e = vSoll - vIst;
+		integralERightMotor += e;
+
+		// Regler
+		double kp = 1;
+		double ki = 0;
+		double td = 0;
+		double outgoingPID = kp * e + ki * integralERightMotor + td * (e - eoldRightMotor);
+		eoldRightMotor = e;
+
+		double powerCalculated = (vSoll + outgoingPID) / factorVPower; // Umrechnung
+																		// in
+																		// Power-Wert
+		return (int) (powerCalculated);
+
 	}
 
 	/**
@@ -546,33 +555,34 @@ public class ControlRST implements IControl {
 	 */
 	private int controlLeftMotor(double vSoll) {
 		if (schalterL == false) {
+			rightMotor.setPower(30);
+			leftMotor.setPower(30);
 			schalterL = true;
-			return 30;
-		} else {
-			double factorVPower = 0.34; // Umrechnung in Power Wert mit:
-										// velocity/factor=power
-			double phiIst = Math.toRadians(this.encoderLeft.getEncoderMeasurement().getAngleSum()); // Umrechung
-																									// deg
-																									// to
-																									// rad
-			double tIst = this.encoderLeft.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
-																						// in
-																						// s
-			double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*m
-			double e = vSoll - vIst;
-			integralELeftMotor += e;
-			// Regler
-			double kp = 1;
-			double ki = 0;
-			double td = 0;
-			double outgoingPID = kp * e + ki * integralELeftMotor + td * (e - eoldLeftMotor);
-			eoldLeftMotor = e;
-
-			double powerCalculated = (vSoll + outgoingPID) / factorVPower; // Umrechnung
-																			// in
-																			// Power-Wert
-			return (int) (powerCalculated);
 		}
+		double factorVPower = 0.34; // Umrechnung in Power Wert mit:
+									// velocity/factor=power
+		double phiIst = Math.toRadians(this.encoderLeft.getEncoderMeasurement().getAngleSum()); // Umrechung
+																								// deg
+																								// to
+																								// rad
+		double tIst = this.encoderLeft.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
+																					// in
+																					// s
+		double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*m
+		double e = vSoll - vIst;
+		integralELeftMotor += e;
+		// Regler
+		double kp = 1;
+		double ki = 0;
+		double td = 0;
+		double outgoingPID = kp * e + ki * integralELeftMotor + td * (e - eoldLeftMotor);
+		eoldLeftMotor = e;
+
+		double powerCalculated = (vSoll + outgoingPID) / factorVPower; // Umrechnung
+																		// in
+																		// Power-Wert
+		return (int) (powerCalculated);
+
 	}
 
 }
