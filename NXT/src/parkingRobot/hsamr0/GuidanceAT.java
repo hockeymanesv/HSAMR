@@ -145,7 +145,7 @@ public class GuidanceAT {
 
 				// Into action
 				if (lastStatus != CurrentStatus.SCOUT) {
-					control.setCtrlMode(ControlMode.LINE_CTRL);
+					control.setCtrlMode(ControlMode.VW_CTRL);
 					navigation.setDetectionState(true);
 				}
 

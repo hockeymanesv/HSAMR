@@ -78,7 +78,7 @@ public class ControlRST implements IControl {
 	static double integralERightMotor = 0;
 	static double integralELeftMotor = 0;
 	boolean schalterR = false;
-	boolean schalterL = true;
+	boolean schalterL = false;
 	// Motors
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
@@ -93,8 +93,8 @@ public class ControlRST implements IControl {
 	int rightMotorPower = 0;
 
 	// Speed parameters
-	double velocity = 30 * 3.6;// 3;//0 //in cm/s
-	double angularVelocity = 30;// 3;//0
+	double velocity = 15 * 3.6;// 3;//0 //in cm/s
+	double angularVelocity = -400;// 3;//0
 
 	// Position parameters
 	Pose startPosition = new Pose();
@@ -155,6 +155,8 @@ public class ControlRST implements IControl {
 		// what happens here
 		monitor.addControlVar("RightSensor");
 		monitor.addControlVar("LeftSensor");
+		// monitor.addControlVar("e");
+		// monitor.addControlVar("outgoingPID");
 
 		this.ctrlThread = new ControlThread(this);
 
@@ -427,6 +429,7 @@ public class ControlRST implements IControl {
 
 			double deltaBrightness = actRightSensor - actLeftSensor;
 			double e = 0 - deltaBrightness;
+			// monitor.writeControlVar("E", "" + e);
 
 			double diffE = td * (e - eold);
 			if (integralE <= 40) {
@@ -435,6 +438,7 @@ public class ControlRST implements IControl {
 
 			// Motorpower berechnen
 			double outgoingPID = kp * e + td * diffE + ki * integralE; // PID-Regler
+			// monitor.writeControlVar("outgoingPID", "" + outgoingPID);
 
 			powerLeft = powerOffset + outgoingPID;
 			powerRight = powerOffset - outgoingPID;
@@ -470,50 +474,23 @@ public class ControlRST implements IControl {
 		// Aufgabe 3.2
 
 		// defining variables
-		double velocityLeft = 0;
-		double velocityRight = 0;
+//		double velocityLeft = 0;
+//		double velocityRight = 0;
 		double wheelDistance = 0.101; // Radabstand in m
 
-		if (omega == 0) {
-			// geradeaus fahren
-			velocityLeft = v;
-			velocityRight = v;
-
-		} else if (v == 0 && omega > 0) {
-			// links drehen
-
-			velocityLeft = -30; // Zahlenwerte durch Formeln ersetzen
-			velocityRight = 30;
-
-		} else if (v == 0 && omega < 0) {
-			// rechts drehen
-
-			velocityLeft = 30; // Zahlenwerte durch Formeln ersetzen
-			velocityRight = -30;
-
-		} else if (omega != 0 && v != 0) {
-			// normaler Betriebsmodus
-			// calculating extensions
-			double r = v / omega;
-			double rLeft = r - wheelDistance / 2;
-			double rRight = r + wheelDistance / 2;
-
-			// calculating powers
-			velocityLeft = rLeft * v / r;
-			velocityRight = rRight * v / r;
-		} else if (omega == 0 && v == 0) {
-			// stopp
-			velocityLeft = 0;
-			velocityRight = 0;
-		}
-
+		double velocityLeft = (v - wheelDistance * omega / 2);
+		double velocityRight = (v + wheelDistance * omega / 2);
+		
 		// set power for motors
 		leftMotor.forward();
 		rightMotor.forward();
 
 		// Uebergabe an control Funktionen zur Regelung der Motoren
-		rightMotor.setPower(controlRightMotor(velocityRight));
-		leftMotor.setPower(controlLeftMotor(velocityLeft));
+//		rightMotor.setPower((int) (velocityRight));
+//		leftMotor.setPower((int) (velocityLeft));
+
+		 rightMotor.setPower(controlRightMotor(velocityRight));
+		 leftMotor.setPower(controlLeftMotor(velocityLeft));
 
 	}
 
