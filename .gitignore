@@ -15,6 +15,12 @@ local.properties
 NXT/GuidanceAT.nxj
 NXT/GuidanceAT.nxd
 
+# NXT_CodeÄnderung im Androidprojekt ist hardverlinkt gegen das NXT projekt
+NXTApp/nXT/
+
+#Ignoriere das alte NXT Fernsteuerungsprojekt
+NXT Fernsteuerung/
+
 # latex stuff
 doc/*.aux
 doc/*.log
