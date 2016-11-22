@@ -165,9 +165,6 @@ public class HmiPLT implements INxtHmi{
 			    // Get I/O streams from BT connection
 			    dataIn = connection.openDataInputStream();
 			    dataOut = connection.openDataOutputStream();
-
-				//HALLO
-
 			    if(dataIn == null || dataOut == null)
 			    {
 			    	// Connection failed
