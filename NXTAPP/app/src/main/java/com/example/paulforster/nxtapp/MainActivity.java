@@ -29,6 +29,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import de.amr.plt.rcParkingRobot.AndroidHmiPLT;
+import de.amr.plt.rcTestapp.BluetoothActivity;
 import parkingRobot.INxtHmi;
 import parkingRobot.hsamr0.GuidanceAT;
 
@@ -272,6 +273,9 @@ public class MainActivity extends AppCompatActivity
                             tileView.moveMarker(robot, hmiModule.getPosition().getX(), hmiModule.getPosition().getY());
                             robot.setRotation(-90-hmiModule.getPosition().getAngle());
                             tileView.moveToMarker(robot, true);
+
+                            //TODO Praklücken abfragen
+
 
                             }
                         }
