@@ -1,5 +1,10 @@
 package com.example.paulforster.nxtapp;
 
+//TODO crash, wenn keine BT-Berechtigungen
+//TODO robo-icon auf kleinen Displays nicht in der Ecke
+//TODO Verhalten bei Abbruch der Verbingung. Auch am Robo.
+//TODO Was ist der IOStream, wann ist er 0?
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -47,6 +52,7 @@ public class MainActivity extends AppCompatActivity
 
     public ImageView robot = null;
     public TileView tileView = null;
+    public ToggleButton toggleButton;
 
 
     @Override
@@ -76,9 +82,9 @@ public class MainActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
-
+        //TODO Button graut sich nach Rotation aus. Warum?
         //toggle button allows user to set mode of the NXT device
-        final ToggleButton toggleButton = (ToggleButton) findViewById(R.id.toggleMode);
+        toggleButton = (ToggleButton) findViewById(R.id.toggleMode);
         //disable button initially
         toggleButton.setEnabled(false);
         //on click change mode
@@ -110,9 +116,11 @@ public class MainActivity extends AppCompatActivity
         tileView.setSize(7441, 3189);
         tileView.defineBounds(-15,75,195,-15);
         tileView.addDetailLevel(1f,"robomap/tile-%d_%d.png");
-
+        //TODO Grafik unseres Robots erstellen/verwenden
         robot = new ImageView(this);
         robot.setImageResource(R.drawable.map_marker_normal);
+
+        tileView.addMarker(robot, 0, 0, -0.5f, -1.0f);
 
 
 
@@ -157,6 +165,7 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
+    //TODO Menueinträge anpassen
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
@@ -207,8 +216,9 @@ public class MainActivity extends AppCompatActivity
 //				hmiModule.setMode(Mode.PAUSE);
 
                     //enable toggle button
-                    final ToggleButton toggleMode = (ToggleButton) findViewById(R.id.toggleMode);
-                    toggleMode.setEnabled(true);
+                    //final ToggleButton toggleMode = (ToggleButton) findViewById(R.id.toggleMode);
+                    //toggleMode.setEnabled(true);
+                    toggleButton.setEnabled(true);
                     displayDataNXT();
                     break;
                 } else{
@@ -258,9 +268,10 @@ public class MainActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     public void run() {
                         if(hmiModule != null){
-                            //tileView.moveMarker(robot, hmiModule.getPosition().getX(), hmiModule.getPosition().getY());
-                            tileView.addMarker(robot, 0, 0, -0.5f, -1.0f);
+                            //TODO Roboter folgen
                             tileView.moveMarker(robot, hmiModule.getPosition().getX(), hmiModule.getPosition().getY());
+                            robot.setRotation(-90-hmiModule.getPosition().getAngle());
+                            tileView.moveToMarker(robot, true);
 
                             }
                         }
