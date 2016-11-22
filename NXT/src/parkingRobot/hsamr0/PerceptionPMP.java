@@ -38,9 +38,9 @@ public class PerceptionPMP implements IPerception {
 	double RightLineSensor		=	0;
 	double LeftLineSensor		=	0;
 	double LSrwhite			=	59; 
-	double LSrblack			=	29;
-	double LSlwhite			=	62; 
-	double LSlblack			=	32;
+	double LSrblack			=	32;
+	double LSlwhite			=	61; 
+	double LSlblack			=	35;
 
 
 	double UOdmometry		=	0;
