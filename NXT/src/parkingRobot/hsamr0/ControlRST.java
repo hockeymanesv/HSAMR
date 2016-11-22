@@ -521,10 +521,11 @@ public class ControlRST implements IControl {
 		double factorVPower = 0.34; // Umrechnung in Power Wert mit:
 									// velocity/factor=power
 
-		double phiIst = Math.toRadians(this.encoderRight.getEncoderMeasurement().getAngleSum()); // Umrechnung
-																									// in
+		angleMeasurementRight = encoderRight.getEncoderMeasurement();
+		double phiIst = Math.toRadians(angleMeasurementRight.getAngleSum()); // Umrechnung
+																							// in
 																									// rad
-		double tIst = this.encoderRight.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
+		long tIst = angleMeasurementRight.getDeltaT() / 1000; // Umrechnung
 																					// in
 																					// s
 		double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*m
@@ -561,11 +562,12 @@ public class ControlRST implements IControl {
 		}
 		double factorVPower = 0.34; // Umrechnung in Power Wert mit:
 									// velocity/factor=power
-		double phiIst = Math.toRadians(this.encoderLeft.getEncoderMeasurement().getAngleSum()); // Umrechung
+		angleMeasurementLeft = encoderLeft.getEncoderMeasurement();
+		double phiIst = Math.toRadians(angleMeasurementLeft.getAngleSum()); // Umrechung
 																								// deg
 																								// to
 																								// rad
-		double tIst = this.encoderLeft.getEncoderMeasurement().getDeltaT() / 1000; // Umrechnung
+		double tIst = angleMeasurementLeft.getDeltaT() / 1000; // Umrechnung
 																					// in
 																					// s
 		double vIst = phiIst / tIst * wheelDiameter / 2; // Einheit rad/s*m
