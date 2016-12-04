@@ -4,8 +4,10 @@ import lejos.robotics.navigation.Pose;
 import parkingRobot.IControl;
 import parkingRobot.IMonitor;
 import parkingRobot.IPerception;
+import parkingRobot.IControl.ControlMode;
 import parkingRobot.IPerception.*;
 import lejos.nxt.NXTMotor;
+import lejos.nxt.Sound;
 import parkingRobot.INavigation;
 import java.lang.Math;
 
@@ -65,22 +67,34 @@ public class ControlRST implements IControl {
 	static int sumLeftSensor = 0;
 
 	/**
-	 * version 3
+	 * for Line Control PID
 	 */
-	static double integralE = 0;
-	static double eold = 0;
-	static int blackMarkerRight = 0;
+	static double integralE = 0; // fuer Integral
+	static double eold = 0; // fuer Differentation
+	static int blackMarkerRight = 0; // Variablen zum ausloesen der Kurvenfahrt
 	static int blackMarkerLeft = 0;
-
+	static int previousStatus = 0; // zeigt an, ob im vorhergehenden Zyklus eine
+									// Links (1) oder Rechts (2) Kurve gefahren
+									// wurde
+	static int marker = 0; // zeigt an, ob in rechtskurve
+	
 	/**
 	 * vw Control and wheelControl
 	 */
-	static double eoldRightMotor = 0;
+	static double eoldRightMotor = 0; // fuer Differentation
 	static double eoldLeftMotor = 0;
-	static double integralERightMotor = 0;
+	static double integralERightMotor = 0; // fuer Integration
 	static double integralELeftMotor = 0;
-	static boolean schalterR = false;
-	static boolean schalterL = false;
+	static double phiIstR = 0; // Gefahrener Winkel Rechts
+	static double phiIstL = 0;
+	static double currentAngle = 0; // Insgesamt abgefahrener Winkel
+	static double wheelDistance = 0.114; // Radabstand in m
+
+	/**
+	 * exampleProgram
+	 */
+	static int markerExample = 0;
+
 	// Motors
 	NXTMotor leftMotor = null;
 	NXTMotor rightMotor = null;
@@ -95,8 +109,8 @@ public class ControlRST implements IControl {
 	int rightMotorPower = 0;
 
 	// Speed parameters
-	double velocity = 10;// 3;//0 //in cm/s
-	double angularVelocity = 0;// 3;//0 //in rad/s
+	double velocity = 0;// 3;//0 //in cm/s
+	double angularVelocity = 2;// Math.PI/6;// 3;//0 //in rad/s
 
 	// Position parameters
 	Pose startPosition = new Pose();
@@ -111,9 +125,9 @@ public class ControlRST implements IControl {
 
 	int lastTime = 0;
 
-	// Distance
+	// Distance in m
 	double currentDistance = 0.0;
-	double Distance = 0.0;
+	static double Distance = 0.0;
 
 	// Diameter m
 	double wheelDiameter = 0.056;
@@ -155,10 +169,7 @@ public class ControlRST implements IControl {
 
 		// MONITOR (example)
 		// what happens here
-		monitor.addControlVar("RightSensor");
-		monitor.addControlVar("LeftSensor");
-		// monitor.addControlVar("e");
-		// monitor.addControlVar("outgoingPID");
+//		monitor.addControlVar("Marker");
 
 		this.ctrlThread = new ControlThread(this);
 
@@ -207,7 +218,6 @@ public class ControlRST implements IControl {
 	 * @see parkingRobot.IControl#setPose(Pose currentPosition)
 	 */
 	public void setPose(Pose currentPosition) {
-		// TODO Auto-generated method stub
 		this.currentPosition = currentPosition;
 	}
 
@@ -296,7 +306,8 @@ public class ControlRST implements IControl {
 	 * simple test.
 	 */
 	private void exec_VWCTRL_ALGO() {
-		this.drive(this.velocity, this.angularVelocity);
+		exampleProgram();
+		// this.drive(this.velocity, this.angularVelocity);
 	}
 
 	private void exec_SETPOSE_ALGO() {
@@ -343,8 +354,9 @@ public class ControlRST implements IControl {
 			int highPower = 40;
 
 			// MONITOR (example)
-			monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeft);
-			monitor.writeControlVar("RightSensor", "" + this.lineSensorRight);
+			// monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeft);
+			// monitor.writeControlVar("RightSensor", "" +
+			// this.lineSensorRight);
 
 			if (this.lineSensorLeft == 2 && (this.lineSensorRight == 1)) {
 
@@ -353,7 +365,7 @@ public class ControlRST implements IControl {
 				rightMotor.setPower(highPower);
 
 				// MONITOR (example)
-				monitor.writeControlComment("turn left");
+				// monitor.writeControlComment("turn left");
 
 			} else if (this.lineSensorRight == 2 && (this.lineSensorLeft == 1)) {
 
@@ -362,7 +374,7 @@ public class ControlRST implements IControl {
 				rightMotor.setPower(lowPower);
 
 				// MONITOR (example)
-				monitor.writeControlComment("turn right");
+				// monitor.writeControlComment("turn right");
 			} else if (this.lineSensorLeft == 2 && (this.lineSensorRight == 0)) {
 
 				// when left sensor is on the line, turn left
@@ -370,7 +382,7 @@ public class ControlRST implements IControl {
 				rightMotor.setPower(highPower);
 
 				// MONITOR (example)
-				monitor.writeControlComment("turn left");
+				// monitor.writeControlComment("turn left");
 
 			} else if (this.lineSensorRight == 2 && (this.lineSensorLeft == 0)) {
 
@@ -379,7 +391,7 @@ public class ControlRST implements IControl {
 				rightMotor.setPower(lowPower);
 
 				// MONITOR (example)
-				monitor.writeControlComment("turn right");
+				// monitor.writeControlComment("turn right");
 			} else if (this.lineSensorLeft == 1 && this.lineSensorRight == 0) {
 
 				// when left sensor is on the line, turn left
@@ -387,7 +399,7 @@ public class ControlRST implements IControl {
 				rightMotor.setPower(highPower);
 
 				// MONITOR (example)
-				monitor.writeControlComment("turn left");
+				// monitor.writeControlComment("turn left");
 
 			} else if (this.lineSensorRight == 1 && this.lineSensorLeft == 0) {
 
@@ -396,44 +408,80 @@ public class ControlRST implements IControl {
 				rightMotor.setPower(lowPower);
 
 				// MONITOR (example)
-				monitor.writeControlComment("turn right");
+				// monitor.writeControlComment("turn right");
 
 			} else if (this.lineSensorRight == 0 && this.lineSensorLeft == 0) {
 				leftMotor.setPower(highPower);
 				rightMotor.setPower(highPower);
 
 				// MONITOR (example)
-				monitor.writeControlComment("straight forward");
+				// monitor.writeControlComment("straight forward");
 			}
 
-		} else if (version == 3) {
-			
+		} else if (version == 3) { // mit PID
 
-			if (blackMarkerLeft >= 3) {
+			if ((this.lineSensorLeft == 2 && this.lineSensorRight == 0)) { // wenn
+																			// linker
+																			// sensor
+																			// auf
+																			// schwarz
+																			// kommt
+
 				leftTurn();
-			} else if (blackMarkerRight >= 3) {
+			} else if ((this.lineSensorLeft == 0 && this.lineSensorRight == 2)) { // wenn
+																					// rechter
+																					// sensor
+																					// auf
+																					// schwarz
+																					// kommt
 				rightTurn();
+			} else if (previousStatus == 1 || (this.lineSensorLeft == 2 && this.lineSensorRight == 2 && marker == 0)) { // wenn
+				// links
+				// immer
+				// noch
+				// auf
+				// schwarz
+
+				leftTurn();
+				if (this.lineSensorRight == 0 && this.lineSensorLeft == 0) {
+					previousStatus = 0;
+				}
+			} else if (previousStatus == 2 || (this.lineSensorLeft == 2 && this.lineSensorRight == 2)) { // wenn
+																											// rechts
+																											// immer
+																											// noch
+																											// auf
+																											// schwarz
+				rightTurn();
+				if (this.lineSensorRight == 0 && this.lineSensorLeft == 0) {
+					previousStatus = 0;
+				}
 			} else {
-				// fuer die Geschwindigkeit 45 funktionieren die Parameter:
-				// 0.065,0.0065,0.07
-
-				// Kurvenfahrt
-				if (this.lineSensorLeft == 2 && this.lineSensorRight == 0) {
-					blackMarkerLeft++;
-				} else if (this.lineSensorLeft == 0 && this.lineSensorRight == 2) {
-					blackMarkerRight++;
-				} else {
-					straightForward();
-
+				previousStatus = 0;
+				straightForward();
+			}
+			
+			//Abbruchbedingung fuer Beispielprogramm, muss sonst auskommentiert werden
+			if (intervalContains(350,370,(navigation.getPose().getHeading() / Math.PI * 180))) {
+				stop();
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
+		
 		}
 	}
-/**
- * sets power of motors
- * @param powerLeft power of left motor
- * @param powerRight power of right motor
- */
+
+	/**
+	 * sets power of motors
+	 * 
+	 * @param powerLeft
+	 *            power of left motor
+	 * @param powerRight
+	 *            power of right motor
+	 */
 	private void setMotorPowers(double powerLeft, double powerRight) {
 		leftMotor.forward();
 		rightMotor.forward();
@@ -441,76 +489,76 @@ public class ControlRST implements IControl {
 		leftMotor.setPower((int) powerLeft);
 		rightMotor.setPower((int) powerRight);
 	}
-/**
- * turns the roboter left
- */
+
+	/**
+	 * turns the roboter left
+	 */
 	private void leftTurn() {
-//		blackMarkerLeft = 0;
-//		blackMarkerRight = 0;
+		setMotorPowers(-15, 45); // gut funktionierende Werte sind -15, 45
+		previousStatus = 1;  // Status fuer naechste Drehung setzen
+		
+		// Parameter ruecksetzen
 		integralE = 0;
 		eold = 0;
-		stop();
+		
+		// Funktion um Linienzahl zu erhoehen
 		GuidanceAT.incrementCurrentLine();
+
 	}
-/**
- * turns the roboter right
- */
+
+	/**
+	 * turns the roboter right
+	 */
 	private void rightTurn() {
-//		blackMarkerLeft = 0;
-//		blackMarkerRight = 0;
+		setMotorPowers(45, -15);// gut funktionierende Werte sind 45, -15
+		previousStatus = 2; // Status fuer naechste Drehung setzen
+		
+		// Parameter ruecksetzen
 		integralE = 0;
 		eold = 0;
-		stop();
+		marker = 1;
+		
+		// Funktion um Linienzahl zu erhoehen
 		GuidanceAT.incrementCurrentLine();
 	}
-/**
- * PID for straight forward driving
- */
+
+	/**
+	 * PID for straight forward driving
+	 */
 	private void straightForward() {
-		double powerOffset = 45;// 45;// 30
-		// Geradeausfahrt
-		// monitor.writeControlComment("geradeausfahrt");
 
 		// Variables
-
+		marker = 0;
+		double powerOffset = 50;// 45;// 30
 		int actRightSensor = this.lineSensorRightV;
 		int actLeftSensor = this.lineSensorLeftV;
 
-		// monitor.writeControlComment("left");
-		monitor.writeControlVar("LeftSensor", "" + this.lineSensorLeftV);
-		// monitor.writeControlComment("right");
-		monitor.writeControlVar("RightSensor", "" + this.lineSensorRightV);
-
 		// parameters for PID
-		// Werte fuer schwarz: 0.1 (0.08) ,0.003,0.25
-		// Werte fuer weiss: 0.2,0.0015,0.05
-		final double kp = 0.067;// 0.065;//0.2//0.25//0.15;// 0.2
-		final double ki = 0.007;// 0.0001;//0.1//0.08;// 0.0015//0.003;
-		final double td = 0.07;// 0.08//0.1//0.125//0.2//0.35;//0.35;//0.9;//
-								// 0.05//0.2;
+		// gut funktionierende Werte fuer vollen Akku sind: 0.067, 0.0074, 0.067
+		final double kp = 0.067;
+		final double ki = 0.0078;
+		final double td = 0.063;
 
+		// Calculation parameters PID
 		double deltaBrightness = actRightSensor - actLeftSensor;
 		double e = 0 - deltaBrightness; // Fuehrungsgroesse = 0
-		// monitor.writeControlVar("E", "" + e);
-
 		double diffE = (e - eold);
-		// if (integralE <= 5) {
 		integralE += e;
-		// }
 
 		// Motorpower berechnen
 		double outgoingPID = kp * e + td * diffE + ki * integralE; // PID-Regler
-		// monitor.writeControlVar("outgoingPID", "" + outgoingPID);
-
 		double powerLeft = powerOffset + outgoingPID;
 		double powerRight = powerOffset - outgoingPID;
 
-		// neue Variablenzuweisung
+		// setting new variables
 		eold = e;
-		
-		setMotorPowers(powerLeft, powerRight); 
+
+		setMotorPowers(powerLeft, powerRight);
 	}
 
+	/**
+	 * stops the NXT
+	 */
 	private void stop() {
 		this.leftMotor.stop();
 		this.rightMotor.stop();
@@ -526,11 +574,7 @@ public class ControlRST implements IControl {
 	 *            angle velocity of the robot in
 	 */
 	private void drive(double v, double omega) {
-		// Aufgabe 3.2
-
 		// defining variables
-		// double velocityLeft = 0;
-		// double velocityRight = 0;
 		double wheelDistance = 0.114; // Radabstand in m
 
 		// Berechnung der Geschwindigkeiten fuer den rechten und linken Motor
@@ -541,17 +585,11 @@ public class ControlRST implements IControl {
 																			// m/s
 		double velocityRight = (v / 100.0 + wheelDistance / 2.0 * omega);
 
-		// monitor.writeControlVar("LeftSensor", "" + tIst);
-		// monitor.writeControlVar("RightSensor", "" + vIst);
-
 		// set power for motors
 		leftMotor.forward();
 		rightMotor.forward();
 
 		// Uebergabe an control Funktionen zur Regelung der Motoren
-		// rightMotor.setPower((int) (velocityRight));
-		// leftMotor.setPower((int) (velocityLeft));
-
 		rightMotor.setPower(controlRightMotor(velocityRight));
 		leftMotor.setPower(controlLeftMotor(velocityLeft));
 
@@ -570,24 +608,31 @@ public class ControlRST implements IControl {
 		double factorVPower = 0.0034; // Umrechnung in Power Wert mit:
 										// velocity/factor=power
 
+		// read data
 		angleMeasurementRight = encoderRight.getEncoderMeasurement();
-		double phiIst = Math.toRadians(angleMeasurementRight.getAngleSum()); // Umrechnung
-																				// in
-																				// rad
+		phiIstR = Math.toRadians(angleMeasurementRight.getAngleSum()); // Umrechnung
+																		// in
+																		// rad
+
+		// calculate data
 		double tIst = angleMeasurementRight.getDeltaT() / 1000.0; // Umrechnung
 																	// in
 																	// s
-		double vIst = phiIst / tIst * wheelDiameter / 2.0; // Einheit rad/s*m
+		double vIst = phiIstR / tIst * wheelDiameter / 2.0; // Einheit rad/s*m
 		double e = vSoll - vIst;
+		
 		integralERightMotor += e;
 
-		// Regler
-		double kp = 0.8;
-		double ki = 0.3;
-		double td = 0.1;
+		// control
+		double kp = 0.14;
+		double ki = 0.33;
+		double td = 0.27;
 		double outgoingPID = kp * e + ki * integralERightMotor + td * (e - eoldRightMotor);
+
+		// set new variables
 		eoldRightMotor = e;
 
+		// set power
 		double powerCalculated = (vSoll + outgoingPID) / factorVPower; // Umrechnung
 																		// in
 																		// Power-Wert
@@ -606,29 +651,117 @@ public class ControlRST implements IControl {
 	private int controlLeftMotor(double vSoll) {
 		double factorVPower = 0.0034; // Umrechnung in Power Wert mit:
 										// velocity/factor=power
+
+		// read data
 		angleMeasurementLeft = encoderLeft.getEncoderMeasurement();
-		double phiIst = Math.toRadians(angleMeasurementLeft.getAngleSum()); // Umrechung
-																			// deg
-																			// to
-																			// rad
+		phiIstL = Math.toRadians(angleMeasurementLeft.getAngleSum()); // Umrechung
+																		// deg
+																		// to
+																		// rad
+
+		// calculate data
 		double tIst = angleMeasurementLeft.getDeltaT() / 1000.0; // Umrechnung
-																	// in
-																	// s
-		double vIst = phiIst / tIst * wheelDiameter / 2.0; // Einheit rad/s*m
+																// in
+																// s
+		double vIst = phiIstL / tIst * wheelDiameter / 2.0; // Einheit rad/s*m
 		double e = vSoll - vIst;
+
+		//set new variables
 		integralELeftMotor += e;
-		// Regler
-		double kp = 0.8;
-		double ki = 0.3;
-		double td = 0.1;
+		
+		// control
+		// Werte: 0.13, 0.255, 0.24
+		double kp = 0.14;// 0.45;// 0.8;
+		double ki = 0.33;// 0.3;// 0.3;
+		double td = 0.27;// 0.25// 0.1;// 0.1;
 		double outgoingPID = kp * e + ki * integralELeftMotor + td * (e - eoldLeftMotor);
+
+		// set new variables
 		eoldLeftMotor = e;
 
+		// set power
 		double powerCalculated = (vSoll + outgoingPID) / factorVPower; // Umrechnung
 																		// in
 																		// Power-Wert
 		return (int) (powerCalculated);
 
+	}
+
+	/**
+	 * program for first defence
+	 */
+	private void exampleProgram() {
+		double sollAngle = Math.PI / 2.0 * wheelDistance / wheelDiameter;
+		monitor.writeControlComment("Sollwinkel" + sollAngle);
+
+		if (markerExample == 0) { //erste Geradeausfahrt
+			drive(10, 0);
+			currentAngle = 0;
+			if (Distance >= 1.5) {
+				markerExample = 1;
+				stop();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		} else if (markerExample == 1) { //erste Drehung
+			drive(0, Math.PI / 12.0);
+			Distance = 0;
+			if (currentAngle >= sollAngle - 3 / 18 * Math.PI) {
+				markerExample = 2;
+				stop();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		} else if (markerExample == 2) { //zweite Geradeausfahrt
+			drive(5, 0);
+			currentAngle = 0;
+			if (Distance >= 0.3) {
+				markerExample = 3;
+				stop();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		} else if (markerExample == 3) { //zweite Drehung
+			drive(0, Math.PI / 6.0);
+			Distance = 0;
+			if (currentAngle >= sollAngle) {
+				markerExample = 4;
+				stop();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+		} else if (markerExample == 4) { //Uebergehen in Line-Control
+			setCtrlMode(ControlMode.LINE_CTRL);
+			
+		}
+		
+		//calculate new variables
+		Distance += (phiIstR + phiIstL) / 4.0 * wheelDiameter;
+		currentAngle += (phiIstR - phiIstL) / 2;
+	}
+	
+	/**
+	 * Function for checking a number if it is in a defined interval
+	 * @param low 
+	 * @param high
+	 * @param n
+	 * @return true if n is in interval, false if not
+	 */
+	private boolean intervalContains(double low, double high, double n) {
+	    return n >= low && n <= high;
 	}
 
 }

@@ -127,7 +127,7 @@ public class GuidanceAT {
 		IMonitor monitor = new Monitor();
 
 		IPerception perception = new PerceptionPMP(leftMotor, rightMotor, monitor);
-		perception.calibrateLineSensors();
+//		perception.calibrateLineSensors();
 
 		INavigation navigation = new NavigationAT(perception, monitor);
 		IControl control = new ControlRST(perception, navigation, leftMotor, rightMotor, monitor);
@@ -145,7 +145,7 @@ public class GuidanceAT {
 
 				// Into action
 				if (lastStatus != CurrentStatus.SCOUT) {
-					control.setCtrlMode(ControlMode.LINE_CTRL);
+					control.setCtrlMode(ControlMode.VW_CTRL);
 					navigation.setDetectionState(true);
 				}
 

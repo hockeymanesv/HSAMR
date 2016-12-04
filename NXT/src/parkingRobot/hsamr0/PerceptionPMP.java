@@ -38,10 +38,10 @@ public class PerceptionPMP implements IPerception {
 	double RightLineSensor		=	0;
 	double LeftLineSensor		=	0;
 	//Achtung Sensoren getauscht!!!
-	double LSlwhite			=	59; 
-	double LSlblack			=	32;
-	double LSrwhite			=	61; 
-	double LSrblack			=	35;
+	double LSlwhite			=	58; 
+	double LSlblack			=	35;
+	double LSrwhite			=	54; 
+	double LSrblack			=	33;
 
 
 	double UOdmometry		=	0;
@@ -81,7 +81,7 @@ public class PerceptionPMP implements IPerception {
 		this.motorLeft  = motorLeft;
 		this.motorRight = motorRight;
 		this.monitor = monitor;
-		monitor.addControlVar("FrontSensor");
+//		monitor.addControlVar("FrontSensor");
 		
 		//build up a Connection to the Arduino via RS485
 		RS485.hsEnable(RS485_BAUD,14);
@@ -296,6 +296,3 @@ public class PerceptionPMP implements IPerception {
 		this.navigationRightEncoder.addAngle((double)deltaPhi);		
 	}	
 }
-
-
-
