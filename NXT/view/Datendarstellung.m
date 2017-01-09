@@ -10,7 +10,7 @@ file = fopen('NXTData.txt', 'r');
 % id = [<module number> <logging data type>]
 % module number: 0 (control), 1 (guidance), 2 (hmi), 3 (navigation), 4 (perception)
 % logging data type: 0 (chart), 1 (comment strings)
-id = [0 0];
+id = [0 1];
 
 %% Execution part - do not change without specific goals
 output = {}; % output cell array

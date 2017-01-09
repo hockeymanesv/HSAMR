@@ -1,6 +1,7 @@
 package parkingRobot;
 
 import lejos.robotics.navigation.Pose;
+import lejos.util.Matrix;
 
 /**
  * interface for the main module 'Control', providing methods for executing the algorithms to
@@ -40,7 +41,17 @@ public interface IControl {
 		/**
 		 * NXT in Ruhe versetzen
 		 */
-		INACTIVE
+		INACTIVE,
+		
+		/**
+		 * erstes Beispielprogramm abspielen
+		 */
+//		EXAMPLE_ONE,
+		
+		/**
+		 * zweites Beispielprogramm abspielen
+		 */
+//		EXAMPLE_TWO
 	}
 	
 		
@@ -97,6 +108,18 @@ public interface IControl {
 	 * execute the selected algorithms for control which was set by guidance
 	 */
 	public void exec_CTRL_ALGO();
+	
+	/**
+	 * Koeffizienten fuer Einparken und Ausparken uebergeben
+	 * @param Matrix Matrix mit berechneten den Parametern
+	 */
+	public void setCoefficients(Matrix matrix);
+	
+	/**
+	 * setzt, ob beim Einparken oder Ausparken
+	 * @param status
+	 */
+	public void setInOrOut(boolean status);
 
 }
 

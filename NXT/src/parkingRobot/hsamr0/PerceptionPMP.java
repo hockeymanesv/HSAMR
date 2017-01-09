@@ -81,7 +81,7 @@ public class PerceptionPMP implements IPerception {
 		this.motorLeft  = motorLeft;
 		this.motorRight = motorRight;
 		this.monitor = monitor;
-//		monitor.addControlVar("FrontSensor");
+		monitor.addControlVar("FrontSensor");
 		
 		//build up a Connection to the Arduino via RS485
 		RS485.hsEnable(RS485_BAUD,14);
@@ -296,3 +296,6 @@ public class PerceptionPMP implements IPerception {
 		this.navigationRightEncoder.addAngle((double)deltaPhi);		
 	}	
 }
+
+
+

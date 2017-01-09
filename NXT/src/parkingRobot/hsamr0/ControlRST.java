@@ -10,6 +10,7 @@ import lejos.nxt.NXTMotor;
 import lejos.nxt.Sound;
 import parkingRobot.INavigation;
 import java.lang.Math;
+import lejos.util.Matrix;
 
 /**
  * Main class for control module setting start parameters
@@ -77,23 +78,75 @@ public class ControlRST implements IControl {
 									// Links (1) oder Rechts (2) Kurve gefahren
 									// wurde
 	static int marker = 0; // zeigt an, ob in rechtskurve
-	
+	static boolean turn = false;
+
+	/**
+	 * Line control PID version 1
+	 */
+	static boolean blackRight = false; // rechter Sensor schwarz
+	static boolean blackLeft = false; // linker Sensor schwarz
+	static boolean zwischenmarker = false; // Kurve registriert aber weiter
+											// geradeaus
+	static boolean turningRight = false; // zur Zeit rechts drehen
+	static boolean turningLeft = false; // zur Zeit links drehen
+	static boolean straightDriving = true; // geradeausfahrt
+
 	/**
 	 * vw Control and wheelControl
 	 */
 	static double eoldRightMotor = 0; // fuer Differentation
 	static double eoldLeftMotor = 0;
-	static double integralERightMotor = 0; // fuer Integration
-	static double integralELeftMotor = 0;
+	double integralERightMotor = 0; // fuer Integration
+	double integralELeftMotor = 0;
 	static double phiIstR = 0; // Gefahrener Winkel Rechts
 	static double phiIstL = 0;
 	static double currentAngle = 0; // Insgesamt abgefahrener Winkel
 	static double wheelDistance = 0.114; // Radabstand in m
+	double outgoingPID = 0;
+
+	/**
+	 * setPose
+	 */
+	static double eOldSetPose = 0;
+	double destinationX = 1.8; // in m
+	double destinationY = 0.6; // in m
+	double destinationPhi = -Math.PI / 2.0;// 11.0/36.0*Math.PI;
+	static boolean direction = false;
+	static boolean xReached = false;
+	static boolean yReached = false;
+	static boolean phiReached = false;
+	double outgoingPD = 0;
+
+	/**
+	 * Path Finder
+	 */
+	static double x1 = 0.0022;
+	static double x2 = -0.1;
+	static double x3 = 2.5;
+	static double x4 = 0.0;
+	static double d = 0.5; // Abtastabstand in cm
+	static double abtastx = 0.0; // x-Wert an dem abgetastet wird
+	static double timeOld = 0.0;
+	static boolean inOrOut = true; // true wenn in, false wenn out
+	static boolean beginningPark = true; // zeigt an, ob es sich um den Anfang
+											// des parkens handelt, damit
+											// Anfangsposition gesetzt werden
+											// kann, reset, wenn parken beendet
+	static double anfangx = 0.0;
+	static double anfangy = 0.0;
+	static boolean endParking = false;
 
 	/**
 	 * exampleProgram
 	 */
 	static int markerExample = 0;
+	static boolean firstExample = false;
+	static boolean markerOWR = true;
+	static boolean markerFEP2 = false; // Abschnitt zwei, wird true ab
+										// LineControl falsch herum
+	static boolean markerFEP3 = false; // Abschnitt drei, wird true ab
+										// LineControl wieder richtig herum zur
+										// Parkluecke
 
 	// Motors
 	NXTMotor leftMotor = null;
@@ -109,8 +162,8 @@ public class ControlRST implements IControl {
 	int rightMotorPower = 0;
 
 	// Speed parameters
-	double velocity = 0;// 3;//0 //in cm/s
-	double angularVelocity = 2;// Math.PI/6;// 3;//0 //in rad/s
+	double velocity = 5.0;// 3;//0 //in cm/s
+	double angularVelocity = 0;// Math.PI/6;// 3;//0 //in rad/s
 
 	// Position parameters
 	Pose startPosition = new Pose();
@@ -126,8 +179,8 @@ public class ControlRST implements IControl {
 	int lastTime = 0;
 
 	// Distance in m
-	double currentDistance = 0.0;
-	static double Distance = 0.0;
+	// double currentDistance = 0.0;
+	static double distance = 0.0;
 
 	// Diameter m
 	double wheelDiameter = 0.056;
@@ -169,7 +222,27 @@ public class ControlRST implements IControl {
 
 		// MONITOR (example)
 		// what happens here
-//		monitor.addControlVar("Marker");
+		// monitor.addControlVar("Marker");
+		// monitor.addControlVar("phiSoll");
+		// monitor.addControlVar("deltaX");
+		// monitor.addControlVar("deltaY");
+		// monitor.addControlVar("x");
+		// monitor.addControlVar("y");
+		// monitor.addControlVar("poseX");
+		// monitor.addControlVar("poseY");
+		// monitor.addControlVar("outgoingPD");
+		// monitor.addControlVar("phiIst");
+		// monitor.addControlVar("phiSoll");
+		// monitor.addControlVar("omega");
+		// monitor.addControlVar("calculatedy");
+		// monitor.addControlVar("abtastx");
+		// monitor.addControlVar("neux");
+		// monitor.addControlVar("neuy");
+		// monitor.addControlVar("generaly");
+		// monitor.addControlVar("heading");
+		// monitor.addControlVar("radius");
+		// monitor.addControlVar("yDerivation");
+		// monitor.addControlVar("yDerivationForward");
 
 		this.ctrlThread = new ControlThread(this);
 
@@ -229,6 +302,15 @@ public class ControlRST implements IControl {
 	}
 
 	/**
+	 * returns current ControlMode
+	 * 
+	 * @return ControlMode
+	 */
+	public ControlMode getCtrlMode() {
+		return this.currentCTRLMODE;
+	}
+
+	/**
 	 * set start time
 	 */
 	public void setStartTime(int startTime) {
@@ -249,6 +331,7 @@ public class ControlRST implements IControl {
 			break;
 		case VW_CTRL:
 			update_VWCTRL_Parameter();
+			// firstExampleProgram();
 			exec_VWCTRL_ALGO();
 			break;
 		case SETPOSE:
@@ -262,6 +345,9 @@ public class ControlRST implements IControl {
 		case INACTIVE:
 			exec_INACTIVE();
 			break;
+		// case EXAMPLE_ONE:
+		// exec_example_one();
+		// break;
 		}
 
 	}
@@ -272,6 +358,8 @@ public class ControlRST implements IControl {
 	 * update parameters during VW Control Mode
 	 */
 	private void update_VWCTRL_Parameter() {
+		angleMeasurementRight = encoderRight.getEncoderMeasurement();
+		angleMeasurementLeft = encoderLeft.getEncoderMeasurement();
 		setPose(navigation.getPose());
 	}
 
@@ -279,6 +367,8 @@ public class ControlRST implements IControl {
 	 * update parameters during SETPOSE Control Mode
 	 */
 	private void update_SETPOSE_Parameter() {
+		angleMeasurementRight = encoderRight.getEncoderMeasurement();
+		angleMeasurementLeft = encoderLeft.getEncoderMeasurement();
 		setPose(navigation.getPose());
 	}
 
@@ -287,6 +377,9 @@ public class ControlRST implements IControl {
 	 */
 	private void update_PARKCTRL_Parameter() {
 		// Aufgabe 3.4
+		angleMeasurementRight = encoderRight.getEncoderMeasurement();
+		angleMeasurementLeft = encoderLeft.getEncoderMeasurement();
+		setPose(navigation.getPose());
 	}
 
 	/**
@@ -306,12 +399,15 @@ public class ControlRST implements IControl {
 	 * simple test.
 	 */
 	private void exec_VWCTRL_ALGO() {
-		exampleProgram();
-		// this.drive(this.velocity, this.angularVelocity);
+		// exampleProgram();
+		this.drive(this.velocity, this.angularVelocity);
 	}
 
+	/**
+	 * Funktion zum Anfahren einer Zielposition
+	 */
 	private void exec_SETPOSE_ALGO() {
-		// Aufgabe 3.3
+		this.driveToPose(this.destinationX, this.destinationY, this.destinationPhi);
 	}
 
 	/**
@@ -319,6 +415,170 @@ public class ControlRST implements IControl {
 	 */
 	private void exec_PARKCTRL_ALGO() {
 		// Aufgabe 3.4
+		// Werte der Parkluecke
+		int version = 2;
+		if (beginningPark) {
+			anfangx = navigation.getPose().getX(); // Einheit m
+			anfangy = navigation.getPose().getY(); // Einheit m
+			destinationX = anfangx;
+			destinationY = anfangy;
+			destinationPhi = -(Math.PI / 2 - Math.atan(3 * x1 * anfangx * anfangx + x2 * 2 * anfangx + x3));
+			driveToPose(destinationX, destinationY, destinationPhi);
+			if (phiReached) {
+				beginningPark = false;
+			}
+		} else if (!beginningPark && !endParking && version==1) {
+
+			// Position des Roboters auf der Platte im grossen Koordinatensystem
+			double generalx = navigation.getPose().getX(); // Einheit m
+			double generaly = navigation.getPose().getY(); // Einheit m
+			double heading = navigation.getPose().getHeading(); // Einheit rad
+			
+
+			// Position des Roboters in der Parkluecke
+			double neuy = generalx - anfangx; // Einheit m
+			double neux = -generaly - anfangy; // Einheit m
+			
+			monitor.writeControlComment("neux=" + neux);
+			// Abtastung neu setzen
+			abtastx = neux * 100; // Einheit cm
+
+			
+
+			// Zeit auslesen und berechnen
+			double time = System.currentTimeMillis(); // Einheit millisekunden
+			double deltaTime = time - timeOld; // Einheit millisekunden
+			timeOld = time; // fuer naechsten Durchlauf // Einheit millisekunden
+
+			// Polynomberechnung
+			double yDerivation = (3 * x1 * abtastx * abtastx + x2 * 2 * abtastx + x3); // Anstieg
+																						// an
+																						// der
+																						// jetzigen
+																						// Position
+			double yDerivationForward = (3 * x1 * (abtastx + d) * (abtastx + d) + 2 * x2 * (abtastx + d) + x3); // Anstieg
+																												// an
+																												// der
+																												// naechsten
+																												// Position
+			// Winkel berechnen
+
+			double phi = Math.atan(yDerivation);
+			double phiForward = Math.atan(yDerivationForward);
+			double deltaPhi = 0;
+
+			double phiKorrigiert=Math.PI-phi;
+			double phiForwardKorrigiert=Math.PI-phiForward;
+			// Wendung in der Mitte des Pfads, jeweils fuer einparken und
+			// ausparken
+			if (abtastx < 15 && inOrOut) {// eiparken
+				deltaPhi = (phiForwardKorrigiert - phiKorrigiert);
+			} else if (abtastx > 15 && inOrOut) {// einparken
+				deltaPhi = (phiForwardKorrigiert - phiKorrigiert);
+			} else if (abtastx < 15 && !inOrOut) {// ausparken
+				deltaPhi = -(phiForwardKorrigiert - phiKorrigiert);
+			} else if (abtastx > 15 && !inOrOut) {// ausparken
+				deltaPhi = (phiForwardKorrigiert - phiKorrigiert);
+			}
+
+			double omega = deltaPhi / deltaTime * 1000; // * 1000 wegen
+			// umrechnung zu s
+
+			// Berechnung von omega mit w=deltaPhi/deltaT
+			double velocity = 4.5; // konstante Geschwindigkeit in cm/s
+			drive(velocity, omega);
+
+			// Stoppbedingungen
+			boolean markerx = intervalContains(0.25, 0.3, neux);
+			if (markerx) {
+				endParking = true;
+			}
+			} else if (!beginningPark && !endParking && version==2) {
+				
+
+				// Position des Roboters auf der Platte im grossen Koordinatensystem
+				double generalx = navigation.getPose().getX(); // Einheit m
+				double generaly = navigation.getPose().getY(); // Einheit m
+				double heading = navigation.getPose().getHeading(); // Einheit rad
+				
+
+				// Position des Roboters in der Parkluecke
+				double neuy = generalx - anfangx; // Einheit m
+				double neux = -generaly - anfangy; // Einheit m
+				
+				monitor.writeControlComment("neux=" + neux);
+				// Abtastung neu setzen
+				abtastx = neux * 100; // Einheit cm
+
+				
+
+				// Zeit auslesen und berechnen
+				double time = System.currentTimeMillis(); // Einheit millisekunden
+				double deltaTime = time - timeOld; // Einheit millisekunden
+				timeOld = time; // fuer naechsten Durchlauf // Einheit millisekunden
+
+				// Polynomberechnung
+				double y=x1*abtastx*abtastx*abtastx+x2*abtastx*abtastx+x3*abtastx+x4;
+				double yForward=x1*(abtastx + d)*(abtastx + d)*(abtastx + d)+x2*(abtastx + d)*(abtastx + d)+x3*(abtastx + d)+x4;
+				
+				double yDerivation = (3 * x1 * abtastx * abtastx + x2 * 2 * abtastx + x3); // Anstieg
+																							// an
+																							// der
+																							// jetzigen
+																							// Position
+				double yDerivationForward = (3 * x1 * (abtastx + d) * (abtastx + d) + 2 * x2 * (abtastx + d) + x3); // Anstieg
+																													// an
+																													// der
+																													// naechsten
+																													// Position
+				// Winkel berechnen
+
+				double phi = Math.atan(yDerivation);
+				double phiForward = Math.atan(yDerivationForward);
+				double deltaPhi = 0;
+
+				// Wendung in der Mitte des Pfads, jeweils fuer einparken und
+				// ausparken
+				if (abtastx < 15 && inOrOut) {// eiparken
+					deltaPhi = (phiForward - phi);
+				} else if (abtastx > 15 && inOrOut) {// einparken
+					deltaPhi = (phiForward - phi);
+//				} else if (abtastx < 15 && !inOrOut) {// ausparken
+//					deltaPhi = -(phiForward - phi);
+//				} else if (abtastx > 15 && !inOrOut) {// ausparken
+//					deltaPhi = (phiForward - phi);
+//				}
+				}
+				
+				double hyp=Math.sqrt((yForward-y)*(yForward-y)+d*d);
+				double k=Math.PI*2.0/deltaPhi;
+				double r=k*hyp/Math.PI/2.0;
+				
+				double velocity = 4.5; // konstante Geschwindigkeit in cm/s
+				double omega = velocity/r; // * 1000 wegen
+				// umrechnung zu s
+
+				// Berechnung von omega mit w=deltaPhi/deltaT
+				 
+				drive(velocity, omega);
+
+				// Stoppbedingungen
+				boolean markerx = intervalContains(0.29, 0.3, neux);
+				if (markerx) {
+					endParking = true;
+				}
+		} else if (endParking) { // Endausrichtung
+			destinationX = navigation.getPose().getX();
+			destinationY = navigation.getPose().getY();
+			destinationPhi = 0;
+			driveToPose(destinationX, destinationY, destinationPhi);
+
+			if (intervalContains(0, 2, (navigation.getPose().getHeading() / Math.PI * 180))) {
+				beginningPark = true;
+				endParking = false;
+				GuidanceAT.setParkmaneuverFinished();
+			}
+		}
 	}
 
 	private void exec_INACTIVE() {
@@ -342,9 +602,7 @@ public class ControlRST implements IControl {
 	private void exec_LINECTRL_ALGO() {
 		// leftMotor.forward();
 		// rightMotor.forward();
-		int version = 3; // 0 --> drei farbwerte (zickzack), 1--> PID version 1,
-							// 2 --> PID version 2, 3 --> PID version 3 best
-							// working
+		int version = 1; // 0 --> drei farbwerte (zickzack), 1--> PID version
 
 		if (version == 0) { // Entscheidung je nach Version, ob zickzack oder
 							// PID
@@ -418,22 +676,21 @@ public class ControlRST implements IControl {
 				// monitor.writeControlComment("straight forward");
 			}
 
-		} else if (version == 3) { // mit PID
-
-			if ((this.lineSensorLeft == 2 && this.lineSensorRight == 0)) { // wenn
+		} else if (version == 1) { // mit PID
+			// checkForTurn();
+			if (this.lineSensorLeft == 2 && this.lineSensorRight == 0) { // wenn
 																			// linker
 																			// sensor
 																			// auf
 																			// schwarz
 																			// kommt
-
 				leftTurn();
-			} else if ((this.lineSensorLeft == 0 && this.lineSensorRight == 2)) { // wenn
-																					// rechter
-																					// sensor
-																					// auf
-																					// schwarz
-																					// kommt
+			} else if (this.lineSensorLeft == 0 && this.lineSensorRight == 2) { // wenn
+																				// rechter
+																				// sensor
+																				// auf
+																				// schwarz
+																				// kommt
 				rightTurn();
 			} else if (previousStatus == 1 || (this.lineSensorLeft == 2 && this.lineSensorRight == 2 && marker == 0)) { // wenn
 				// links
@@ -456,21 +713,54 @@ public class ControlRST implements IControl {
 				if (this.lineSensorRight == 0 && this.lineSensorLeft == 0) {
 					previousStatus = 0;
 				}
-			} else {
+			} else if (!turn) {
 				previousStatus = 0;
-				straightForward();
+				if (navigation.getCurrentLine()==3){
+					straightForward(35.0);
+				} else {
+				straightForward(40.0);
+				}
+			} else if (turn) {
+				previousStatus = 0;
+				straightForward(20.0);
+				// stop();
 			}
-			
-			//Abbruchbedingung fuer Beispielprogramm, muss sonst auskommentiert werden
-			if (intervalContains(350,370,(navigation.getPose().getHeading() / Math.PI * 180))) {
+
+			// Abbruchbedingung fuer Beispielprogramm, muss sonst auskommentiert
+			// werden
+			if (intervalContains(-10, 0, (navigation.getPose().getHeading() / Math.PI * 180)) && firstExample
+					&& !markerFEP2 && !markerFEP3) {
 				stop();
 				try {
-					Thread.sleep(10000);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				destinationX = 1.8;
+				destinationY = 0.6;
+				destinationPhi = -Math.PI / 2.0;
+				setCtrlMode(ControlMode.SETPOSE);
 			}
-		
+			if (intervalContains(-10, 10, (navigation.getPose().getHeading() / Math.PI * 180))
+					&& intervalContains(0, 0.05, navigation.getPose().getX()) && markerFEP2) {
+				destinationX = navigation.getPose().getX();
+				destinationY = navigation.getPose().getY();
+				destinationPhi = 0;
+				phiReached = false;
+				xReached = false;
+				yReached = false;
+				setCtrlMode(ControlMode.SETPOSE);
+			}
+			if (markerFEP3 && perception.getFrontSideSensorDistance() > 200
+					&& perception.getBackSideSensorDistance() < 200) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				setCtrlMode(ControlMode.PARK_CTRL);
+			}
 		}
 	}
 
@@ -485,7 +775,8 @@ public class ControlRST implements IControl {
 	private void setMotorPowers(double powerLeft, double powerRight) {
 		leftMotor.forward();
 		rightMotor.forward();
-
+		// monitor.writeControlComment("Rechte Power:" + powerRight + "linke
+		// Power:" + powerLeft);
 		leftMotor.setPower((int) powerLeft);
 		rightMotor.setPower((int) powerRight);
 	}
@@ -494,15 +785,15 @@ public class ControlRST implements IControl {
 	 * turns the roboter left
 	 */
 	private void leftTurn() {
-		setMotorPowers(-15, 45); // gut funktionierende Werte sind -15, 45
-		previousStatus = 1;  // Status fuer naechste Drehung setzen
-		
+		setMotorPowers(-15, 48); // gut funktionierende Werte sind -15, 45
+		previousStatus = 1; // Status fuer naechste Drehung setzen
+
 		// Parameter ruecksetzen
 		integralE = 0;
 		eold = 0;
-		
+
 		// Funktion um Linienzahl zu erhoehen
-		GuidanceAT.incrementCurrentLine();
+		// GuidanceAT.incrementCurrentLine();
 
 	}
 
@@ -510,34 +801,34 @@ public class ControlRST implements IControl {
 	 * turns the roboter right
 	 */
 	private void rightTurn() {
-		setMotorPowers(45, -15);// gut funktionierende Werte sind 45, -15
+		setMotorPowers(45, -20);// gut funktionierende Werte sind 45, -15
 		previousStatus = 2; // Status fuer naechste Drehung setzen
-		
+
 		// Parameter ruecksetzen
 		integralE = 0;
 		eold = 0;
 		marker = 1;
-		
+
 		// Funktion um Linienzahl zu erhoehen
-		GuidanceAT.incrementCurrentLine();
+		// GuidanceAT.incrementCurrentLine();
 	}
 
 	/**
 	 * PID for straight forward driving
 	 */
-	private void straightForward() {
+	private void straightForward(double powerOffset) {
 
 		// Variables
 		marker = 0;
-		double powerOffset = 50;// 45;// 30
+		// double powerOffset = 50;// 45;// 30
 		int actRightSensor = this.lineSensorRightV;
 		int actLeftSensor = this.lineSensorLeftV;
 
 		// parameters for PID
 		// gut funktionierende Werte fuer vollen Akku sind: 0.067, 0.0074, 0.067
 		final double kp = 0.067;
-		final double ki = 0.0078;
-		final double td = 0.063;
+		final double ki = 0.0;// 0.0078;
+		final double td = 0.06;// 0.063;
 
 		// Calculation parameters PID
 		double deltaBrightness = actRightSensor - actLeftSensor;
@@ -556,6 +847,19 @@ public class ControlRST implements IControl {
 		setMotorPowers(powerLeft, powerRight);
 	}
 
+	private void checkForTurn() {
+		// double poseX = navigation.getPose().getX();
+		// double poseY = navigation.getPose().getY();
+		// monitor.writeControlVar("poseX", "" + poseX);
+		// monitor.writeControlVar("poseY", "" + poseY);
+		double frontTriang = perception.getFrontSensorDistance() / 1000.0;
+		if (frontTriang <= 0.25) {
+			turn = true;
+		} else {
+			turn = false;
+		}
+	}
+
 	/**
 	 * stops the NXT
 	 */
@@ -571,10 +875,11 @@ public class ControlRST implements IControl {
 	 * @param v
 	 *            velocity of the robot m/s
 	 * @param omega
-	 *            angle velocity of the robot in
+	 *            angle velocity of the robot in rad/s
 	 */
 	private void drive(double v, double omega) {
 		// defining variables
+		monitor.writeControlComment("in drive mit parametern v=" + v + "und w=" + omega);
 		double wheelDistance = 0.114; // Radabstand in m
 
 		// Berechnung der Geschwindigkeiten fuer den rechten und linken Motor
@@ -609,7 +914,7 @@ public class ControlRST implements IControl {
 										// velocity/factor=power
 
 		// read data
-		angleMeasurementRight = encoderRight.getEncoderMeasurement();
+		// angleMeasurementRight = encoderRight.getEncoderMeasurement();
 		phiIstR = Math.toRadians(angleMeasurementRight.getAngleSum()); // Umrechnung
 																		// in
 																		// rad
@@ -619,16 +924,20 @@ public class ControlRST implements IControl {
 																	// in
 																	// s
 		double vIst = phiIstR / tIst * wheelDiameter / 2.0; // Einheit rad/s*m
+		monitor.writeControlComment("phiIstR" + phiIstR);
 		double e = vSoll - vIst;
-		
+
 		integralERightMotor += e;
 
 		// control
 		double kp = 0.14;
 		double ki = 0.33;
 		double td = 0.27;
-		double outgoingPID = kp * e + ki * integralERightMotor + td * (e - eoldRightMotor);
-
+		outgoingPID = kp * e + ki * integralERightMotor + td * (e - eoldRightMotor);
+		// monitor.writeControlComment("integralERightMotor" +
+		// integralERightMotor);
+		// monitor.writeControlComment("eoldRightMotor" + eoldRightMotor);
+		monitor.writeControlComment("outPID" + outgoingPID);
 		// set new variables
 		eoldRightMotor = e;
 
@@ -636,6 +945,7 @@ public class ControlRST implements IControl {
 		double powerCalculated = (vSoll + outgoingPID) / factorVPower; // Umrechnung
 																		// in
 																		// Power-Wert
+		monitor.writeControlComment("powerCalculated" + powerCalculated);
 		return (int) (powerCalculated);
 
 	}
@@ -653,7 +963,7 @@ public class ControlRST implements IControl {
 										// velocity/factor=power
 
 		// read data
-		angleMeasurementLeft = encoderLeft.getEncoderMeasurement();
+		// angleMeasurementLeft = encoderLeft.getEncoderMeasurement();
 		phiIstL = Math.toRadians(angleMeasurementLeft.getAngleSum()); // Umrechung
 																		// deg
 																		// to
@@ -661,20 +971,20 @@ public class ControlRST implements IControl {
 
 		// calculate data
 		double tIst = angleMeasurementLeft.getDeltaT() / 1000.0; // Umrechnung
-																// in
-																// s
+																	// in
+																	// s
 		double vIst = phiIstL / tIst * wheelDiameter / 2.0; // Einheit rad/s*m
 		double e = vSoll - vIst;
 
-		//set new variables
+		// set new variables
 		integralELeftMotor += e;
-		
+
 		// control
 		// Werte: 0.13, 0.255, 0.24
 		double kp = 0.14;// 0.45;// 0.8;
 		double ki = 0.33;// 0.3;// 0.3;
 		double td = 0.27;// 0.25// 0.1;// 0.1;
-		double outgoingPID = kp * e + ki * integralELeftMotor + td * (e - eoldLeftMotor);
+		outgoingPID = kp * e + ki * integralELeftMotor + td * (e - eoldLeftMotor);
 
 		// set new variables
 		eoldLeftMotor = e;
@@ -690,14 +1000,14 @@ public class ControlRST implements IControl {
 	/**
 	 * program for first defence
 	 */
-	private void exampleProgram() {
+	private void firstExampleProgram() {
 		double sollAngle = Math.PI / 2.0 * wheelDistance / wheelDiameter;
-		monitor.writeControlComment("Sollwinkel" + sollAngle);
-
-		if (markerExample == 0) { //erste Geradeausfahrt
+		// monitor.writeControlComment("Sollwinkel" + sollAngle);
+		firstExample = true;
+		if (markerExample == 0) { // erste Geradeausfahrt
 			drive(10, 0);
 			currentAngle = 0;
-			if (Distance >= 1.5) {
+			if (distance >= 1.5) {
 				markerExample = 1;
 				stop();
 				try {
@@ -706,9 +1016,9 @@ public class ControlRST implements IControl {
 					e.printStackTrace();
 				}
 			}
-		} else if (markerExample == 1) { //erste Drehung
+		} else if (markerExample == 1) { // erste Drehung
 			drive(0, Math.PI / 12.0);
-			Distance = 0;
+			distance = 0;
 			if (currentAngle >= sollAngle - 3 / 18 * Math.PI) {
 				markerExample = 2;
 				stop();
@@ -718,10 +1028,10 @@ public class ControlRST implements IControl {
 					e.printStackTrace();
 				}
 			}
-		} else if (markerExample == 2) { //zweite Geradeausfahrt
+		} else if (markerExample == 2) { // zweite Geradeausfahrt
 			drive(5, 0);
 			currentAngle = 0;
-			if (Distance >= 0.3) {
+			if (distance >= 0.3) {
 				markerExample = 3;
 				stop();
 				try {
@@ -730,9 +1040,9 @@ public class ControlRST implements IControl {
 					e.printStackTrace();
 				}
 			}
-		} else if (markerExample == 3) { //zweite Drehung
+		} else if (markerExample == 3) { // zweite Drehung
 			drive(0, Math.PI / 6.0);
-			Distance = 0;
+			distance = 0;
 			if (currentAngle >= sollAngle) {
 				markerExample = 4;
 				stop();
@@ -743,25 +1053,187 @@ public class ControlRST implements IControl {
 				}
 			}
 
-		} else if (markerExample == 4) { //Uebergehen in Line-Control
+		} else if (markerExample == 4) { // Uebergehen in Line-Control
 			setCtrlMode(ControlMode.LINE_CTRL);
-			
 		}
-		
-		//calculate new variables
-		Distance += (phiIstR + phiIstL) / 4.0 * wheelDiameter;
-		currentAngle += (phiIstR - phiIstL) / 2;
+
+		// calculate new variables
+		distance += (phiIstR + phiIstL) / 4.0 * wheelDiameter;
+		currentAngle += (Math.abs(phiIstR) + Math.abs(phiIstL)) / 2;
 	}
-	
+
 	/**
 	 * Function for checking a number if it is in a defined interval
-	 * @param low 
+	 * 
+	 * @param low
 	 * @param high
 	 * @param n
 	 * @return true if n is in interval, false if not
 	 */
 	private boolean intervalContains(double low, double high, double n) {
-	    return n >= low && n <= high;
+		return n >= low && n <= high;
 	}
 
+	/**
+	 * set the destination for SetPose must be called every cycle
+	 * 
+	 * @param pose
+	 */
+	public void setDestinationPose(Pose pose) {
+		destinationX = pose.getX();
+		destinationY = pose.getY();
+		destinationPhi = pose.getHeading();
+	}
+
+	/**
+	 * Koeffizienten fuer Einparken und Ausparken uebergeben
+	 * 
+	 * @param Matrix
+	 *            Matrix mit berechneten den Parametern
+	 */
+	public void setCoefficients(Matrix matrix) {
+		x1 = matrix.get(0, 0);
+		x2 = matrix.get(1, 0);
+		x3 = matrix.get(2, 0);
+		x4 = matrix.get(3, 0);
+	}
+
+	/**
+	 * setzt, ob beim Einparken oder Ausparken
+	 * 
+	 * @param status
+	 */
+	public void setInOrOut(boolean status) {
+		inOrOut = status;
+	}
+
+	private void driveToPose(double xIn, double yIn, double phiIn) {
+		double phiSoll = 0;
+		destinationX = xIn;
+		destinationY = yIn;
+		destinationPhi = phiIn;
+
+		// aktuelle x und y Position
+		double x = navigation.getPose().getX();
+		double y = navigation.getPose().getY();
+		// monitor.writeControlVar("x", "" + x);
+		// monitor.writeControlVar("y", "" + y);
+
+		// Vorberechnungen
+		double deltaX = destinationX - x;
+		double deltaY = destinationY - y;
+		// monitor.writeControlVar("deltaX", "" + deltaX);
+		// monitor.writeControlVar("deltaY", "" + deltaY);
+
+		// calculation of phiSoll
+		if (deltaX > 0) {
+			phiSoll = Math.atan2(deltaY, deltaX);
+		} else if (deltaX < 0 && deltaY >= 0) {
+			phiSoll = Math.atan2(deltaY, deltaX) + Math.PI;
+		} else if (deltaX < 0 && deltaY < 0) {
+			phiSoll = Math.atan2(deltaY, deltaX) - Math.PI;
+		} else if (deltaX == 0 && deltaY > 0) {
+			phiSoll = Math.PI / 2;
+		} else if (deltaX == 0 && deltaY < 0) {
+			phiSoll = -Math.PI / 2;
+		}
+
+		// monitor.writeControlVar("phiSoll", "" + phiSoll);
+		// aktueller Winkel
+		double phiIst = navigation.getPose().getHeading();
+
+		// Startroutine
+		if (!direction && !xReached && !yReached) {
+			if (phiSoll >= 0) {
+				drive(0, 0.5);
+			} else if (phiSoll <= 0) {
+				drive(0, -0.5);
+			}
+			if (intervalContains(phiSoll - Math.toRadians(3), phiSoll + Math.toRadians(3), phiIst)) {
+				direction = true;
+			}
+		}
+
+		// Regler
+		// monitor.writeControlComment("direction=" + direction);
+		if (direction && !xReached && !yReached) {
+			// monitor.writeControlComment("in if");
+			double e = phiSoll - phiIst; // phiSoll-phiIst
+			double td = 0.03;
+			double kp = 0.05;
+			outgoingPD = kp * e + td * (e - eOldSetPose); // muss auf VW
+															// Control
+															// wirken
+
+			// monitor.writeControlVar("outgoingPD", "" + outgoingPD);
+			// monitor.writeControlVar("phiIst", "" + phiIst);
+			// monitor.writeControlVar("phiSoll", "" + phiSoll);
+			drive(10, outgoingPD);
+			// set variables
+			eOldSetPose = e;
+		}
+		// Endroutine //normalerweise Toleranzwert 0.005
+		if (intervalContains(destinationX - 0.005, destinationX + 0.005, x)
+				&& intervalContains(destinationY - 0.005, destinationY + 0.005, y)) {
+			xReached = true;
+			yReached = true;
+			phiReached = false;
+			// monitor.writeControlComment("STOP");
+		}
+		if (intervalContains(destinationX - 0.05, destinationX + 0.05, x)
+				&& intervalContains(destinationY - 0.1, destinationY + 0.1, y) && firstExample) {
+			xReached = true;
+			yReached = true;
+			phiReached = false;
+			// monitor.writeControlComment("STOP");
+		}
+
+		if (xReached && yReached && !phiReached) {
+			if (xReached && yReached && phiIst > destinationPhi) { // Beziehen
+																	// auf
+																	// Winkel
+																	// des
+																	// Roboters
+																	// =
+																	// Sollwinkel
+
+				drive(0, -Math.PI / 6.0);
+				// monitor.writeControlComment("Rechtsdrehung");
+			} else if (xReached && yReached && phiIst < destinationPhi) { // Beziehen
+																			// auf
+																			// Winkel
+																			// des
+																			// Roboters
+																			// =
+																			// Sollwinkel
+
+				drive(0, Math.PI / 6.0);
+				// monitor.writeControlComment("Linksdrehung");
+			}
+		}
+		if (xReached && yReached
+				&& intervalContains(destinationPhi - Math.toRadians(5), destinationPhi + Math.toRadians(5), phiIst)) {
+			phiReached = true;
+			// monitor.writeControlComment("Stop weil Zielposition erreicht");
+			// setCtrlMode(ControlMode.INACTIVE);
+		}
+		if (firstExample && phiReached && !markerFEP2) {
+			if (markerOWR) {
+				distance = 0;
+			}
+			markerOWR = false;
+			drive(5, 0);
+			distance += (phiIstR + phiIstL) / 4.0 * wheelDiameter;
+			if (distance >= 0.05) {
+				setCtrlMode(ControlMode.LINE_CTRL);
+				markerFEP2 = true;
+			}
+		}
+		if (markerFEP2 && intervalContains(0, 10, (navigation.getPose().getHeading() / Math.PI * 180))) {
+			distance = 0;
+			markerFEP2 = false;
+			markerFEP3 = true;
+			setCtrlMode(ControlMode.LINE_CTRL);
+		}
+	}
 }
