@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/map_fragment"
+        android:orientation="vertical" >-->
+
+        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_weight="2"
+            android:elevation="30dp"
+            android:id="@+id/park_main"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_bot"
+        android:visibility="visible"/>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_oben1"
+        android:id="@+id/abstand_oben1"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_oben2"
+        android:id="@+id/abstand_oben2"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_oben3"
+        android:id="@+id/abstand_oben3"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_seiteoben1"
+        android:id="@+id/abstand_seiteoben1"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_seiteoben2"
+        android:id="@+id/abstand_seiteoben2"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_seiteoben3"
+        android:id="@+id/abstand_seiteoben3"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_seiteunten1"
+        android:id="@+id/abstand_seiteunten1"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_seiteunten2"
+        android:id="@+id/abstand_seiteunten2"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_seiteunten3"
+        android:id="@+id/abstand_seiteunten3"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_unten1"
+        android:id="@+id/abstand_unten1"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_unten2"
+        android:id="@+id/abstand_unten2"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/abstand_unten3"
+        android:id="@+id/abstand_unten3"
+        />
+
+
+        </FrameLayout>
+
+

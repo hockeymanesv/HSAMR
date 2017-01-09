@@ -95,7 +95,7 @@ public class NavigationAT implements INavigation{
 	/**
 	 * robot specific constant: distance between wheels
 	 */
-	static final double WHEEL_DISTANCE		= 	0.114; // only rough guess, to be measured exactly and maybe refined by experiments
+	static final double WHEEL_DISTANCE		= 	0.116; // only rough guess, to be measured exactly and maybe refined by experiments
 	
 	static final double FRONT_SENSOR_OFFSET			=	0;
 	static final double FRONT_SIDE_SENSOR_OFFSET	=	0;
@@ -288,15 +288,15 @@ public class NavigationAT implements INavigation{
 			yResult 		= Math.sin(w * deltaT) * (this.pose.getX()-ICCx) + Math.cos(w * deltaT) * (this.pose.getY() - ICCy) + ICCy;
 			angleResult 	= this.pose.getHeading() + w * deltaT;
 		}
-		
-		while (angleResult > 360) {
+		/*
+		while (this.pose.getHeading() > 360) {
 			angleResult		= angleResult - 360;
 		}
 		
-		while (angleResult < 360) {
+		while (this.pose.getHeading() < 0) {
 			angleResult		= angleResult + 360;
 		}
-		
+		*/
 		
 		aTriangSS		=	Math.atan((frontSideEffective - backSideEffective) / distanceSideSensor);
 		xRobo			=	backSideEffective + Math.tan(aTriangSS) * BACK_SIDE_SENSOR_OFFAXIS;
@@ -316,7 +316,12 @@ public class NavigationAT implements INavigation{
 			yRoboBackSide	=	backEffective  + Math.tan(aTriangSS) * BACK_SENSOR_OFFAXIS;
 		}
 		*/
-		if (angleResult < 15 && angleResult > 345 && yResult < 15 && xResult > 15 && xResult < 165) {
+		
+		angleResult = (angleResult % 360);
+		
+	    
+	    
+		if ((angleResult % 360) < 15 && (angleResult % 360) > -345 && yResult < 15 && xResult > 15 && xResult < 165) {
 			yResult			= 0;
 		}
 		
@@ -334,7 +339,6 @@ public class NavigationAT implements INavigation{
 			angleResult		= aTriangSS + 270;
 		}
 		
-
 		this.pose.setLocation((float)xResult, (float)yResult);
 		this.pose.setHeading((float)angleResult);		 
 	}

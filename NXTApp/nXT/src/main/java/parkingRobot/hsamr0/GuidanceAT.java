@@ -51,26 +51,32 @@ public class GuidanceAT {
 	 */
 	public enum CurrentStatus {
 		/**
-		 * indicates that robot is following the line and detecting parking
-		 * slots
+		 * indicates that robot is following the line and maybe detecting parking slots
 		 */
 		SCOUT,
-		/**
-		 * indicates that robot is following the line to a special parking slot
-		 * (ID) and park into this slot
-		 */
+
 		PARK_THIS,
 		/**
-		 * indicates that robot is following the line to the next parking slot
-		 * and park into this slot
+		 * indicates that robot is searching for new parking places to park as soon as possible
 		 */
 		PARK_NOW,
 		/**
-		 * indicates that robot is performing an parking maneuver
+		 * indicates that robot is following the line to reach the selected slot and will initiate the parking operation there.
 		 */
+		/**
+		 * indicates that robot is idling
+		 */
+
+		PARKED,
+		/**
+		 * indicates the Robot is performing the leaving maneuver and  will go to scout mode upon termination
+		 */
+		PARK_OUT,
+
+
 		INACTIVE,
 		/**
-		 * indicates that shutdown of main program has initiated
+		 * indicates that the program is terminating the Bluetooth connection and shutting down the robot.
 		 */
 		EXIT
 	}
@@ -180,7 +186,7 @@ public class GuidanceAT {
 			case PARK_THIS:
 				// Into action
 				if (lastStatus != CurrentStatus.PARK_THIS) {
-					// aktion die auszuführen ist
+					// aktion die auszufÃ¼hren ist
 				}
 
 				// While action
@@ -193,7 +199,7 @@ public class GuidanceAT {
 			case PARK_NOW:
 				// Into action
 				if (lastStatus != CurrentStatus.PARK_NOW) {
-					// aktion die auszuführen ist
+					// aktion die auszufÃ¼hren ist
 				}
 
 				// While action
@@ -288,15 +294,15 @@ public class GuidanceAT {
 		// }
 	}
 
-	// Polynom für Pfadgenerator berechnen
+	// Polynom fÃ¼r Pfadgenerator berechnen
 
 	/*
-	 * Finden der Polynomkoeffizienten mittels lösen eines LGS (Ax = b)
+	 * Finden der Polynomkoeffizienten mittels lÃ¶sen eines LGS (Ax = b)
 	 * 
-	 * 1.Bedingung: f(0)=0 2.Bedingung: f(Lückentiefe)=Lückenbreite 3.Bedingung:
-	 * f(Lückentiefe/2)=Lückenbreite/2 4.Bedingung: f'(Lückentiefe/2)=1 <--
+	 * 1.Bedingung: f(0)=0 2.Bedingung: f(LÃ¼ckentiefe)=LÃ¼ckenbreite 3.Bedingung:
+	 * f(LÃ¼ckentiefe/2)=LÃ¼ckenbreite/2 4.Bedingung: f'(LÃ¼ckentiefe/2)=1 <--
 	 * Steigung des Polynoms zur halben Breite und halb abgefahrenen Strecke
-	 * gleich 45°
+	 * gleich 45Â°
 	 * 
 	 */
 	/*

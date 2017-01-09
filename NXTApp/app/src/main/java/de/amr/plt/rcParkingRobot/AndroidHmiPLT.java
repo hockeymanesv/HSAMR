@@ -16,6 +16,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
 
+import com.example.paulforster.nxtapp.StatusChangeListener;
+
 /**
  * Reference implementation of Android HMI module for communication with NXT robot. The module is used by instantiating it with  
  * name and address of a NXT, and calling {@link #connect() connect()}. Once connection is established and NXT is working, information can be requested
@@ -41,6 +43,14 @@ public class AndroidHmiPLT implements IAndroidHmi {
 	DataInputStream dataIn;
 	// Data stream for outgoing bluetooth data
 	DataOutputStream dataOut;
+
+	/**
+	 * Hier werden später die Listener gespeichert.
+	 * Sie werden in StatusHandler abgearbeitet
+	 * @author paulfoerster
+	 */
+
+	private static ArrayList<StatusChangeListener> statusChangeListenerArrayList = new ArrayList<>();
 
 	/**
 	 * Whether the device is currently connected to a LEGO NXT
@@ -138,6 +148,17 @@ public class AndroidHmiPLT implements IAndroidHmi {
 		return statusHandler.getStatus();
 	}
 
+	/**
+	 *
+	 * @autoh paulfoerster
+	 * @param statusChangeListener
+
+	//TODO muss man so einen Listener auch wieder löschen können?
+	public void setStatusChangeListener(StatusChangeListener statusChangeListener){
+		statusChangeListenerArrayList.add(statusChangeListener);
+	}
+	 */
+
 	public void setMode(Mode mode) {
 		bTCommunicationThread.sendMode(mode);
 	}
@@ -153,7 +174,7 @@ public class AndroidHmiPLT implements IAndroidHmi {
 	 */
 	static class PositionHandler extends Handler {
 
-		private Position position = new Position(new PointF(1, 1), 45, new double[]{0.0, 0.0, 0.0, 0.0});
+		private Position position = new Position(new PointF(0, 0), 0, new double[]{0.0, 0.0, 0.0, 0.0});
 
 		/**
 		 * Returns the latest position information received from NXT device.
@@ -216,6 +237,7 @@ public class AndroidHmiPLT implements IAndroidHmi {
 	static class StatusHandler extends Handler {
 
 		private CurrentStatus status;
+		private CurrentStatus previousstatus;
 
 		/**
 		 * Returns the latest status received from the robot.
@@ -228,6 +250,17 @@ public class AndroidHmiPLT implements IAndroidHmi {
 		@Override
 		public void handleMessage(Message msg) {
 			status = (CurrentStatus)msg.obj;
+			//TODO hier muss ich checken, ob sich der status geändert hat und dann was auslösen
+			/**
+			 * @author paulfoerster
+
+			if(status!=previousstatus) {
+				for (StatusChangeListener statusChangeListener : statusChangeListenerArrayList) {
+					statusChangeListener.onChange();
+				}
+				previousstatus = status;
+			}
+			 */
 		}
 
 	};

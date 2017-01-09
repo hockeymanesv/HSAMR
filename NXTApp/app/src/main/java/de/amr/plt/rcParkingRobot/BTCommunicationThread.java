@@ -11,6 +11,7 @@ import android.util.Log;
 import de.amr.plt.rcParkingRobot.IAndroidHmi.ParkingSlot;
 import de.amr.plt.rcParkingRobot.IAndroidHmi.Position;
 
+
 /**
  * Thread spawned by Application main thread to handle reading and writing operations from/to bluetooth data streams.
  * @author PLT
@@ -29,7 +30,6 @@ class BTCommunicationThread extends Thread {
 	float x = 0, y = 0, angle = 0;
 	double[] distances = new double[]{0,0,0,0};
 	CurrentStatus status;
-
 	/**
 	 * @param hmi
 	 */
@@ -65,14 +65,14 @@ class BTCommunicationThread extends Thread {
 						x = hmi.dataIn.readFloat();	
 						y = hmi.dataIn.readFloat();
 						angle = hmi.dataIn.readFloat();
-						Log.i("TAG_READER_THREAD", "Position: x="+x+" y="+y+" angle="+angle);
+						//Log.i("TAG_READER_THREAD", "Position: x="+x+" y="+y+" angle="+angle);
 
 						// Distance sensor values in clockwise directions (front, right, back, left) in mm
 						distances[0] = hmi.dataIn.readDouble();
 						distances[1] = hmi.dataIn.readDouble();
 						distances[2] = hmi.dataIn.readDouble();
 						distances[3] = hmi.dataIn.readDouble();
-						Log.i("TAG_READER_THREAD", "Distances = " + distances[0] + ", " + distances[1] + ", " + distances[2] + ", " + distances[3]);
+						//Log.i("TAG_READER_THREAD", "Distances = " + distances[0] + ", " + distances[1] + ", " + distances[2] + ", " + distances[3]);
 
 						sendPosition();
 					}

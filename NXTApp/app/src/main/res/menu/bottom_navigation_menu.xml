@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto">
+<item
+    android:id="@+id/mode_pause"
+    android:title="@string/menu_pause"
+    android:icon="@drawable/ic_pause_circle_filled_white_24dp"
+    android:enabled="false"
+    app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/mode_scout"
+        android:title="@string/menu_two"
+        android:icon="@drawable/ic_explore_white_24dp"
+        android:enabled="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/mode_park"
+        android:title="@string/menu_three"
+        android:icon="@drawable/ic_local_parking_black_24dp"
+        android:enabled="false"
+        app:showAsAction="ifRoom" />
+</menu>
