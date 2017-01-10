@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     static AndroidHmiPLT hmiModule = null;
     static ArrayAdapter<String> BTArrayAdapter;
     static BluetoothDialogFragment btDialog = null;
+    Timer refreshTimer;
+    TimerTask refreshTimerTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,18 @@ public class MainActivity extends AppCompatActivity {
         for(int i=0; i<3; i++) {
             bottomNavigationView.getMenu().getItem(i).setChecked(false);
         }
-        refreshMenu();
+        refreshTimer = new Timer();
+        refreshTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshMenu();
+                    }
+                });
+            }
+        };
         bottomNavigationView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -63,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                             case R.id.mode_park:
                                 hmiModule.setMode(INxtHmi.Mode.PARK_NOW);
                                 Toast toast = Toast.makeText(getApplicationContext(),
-                                        "Nächste Parklücke wird angefahren", Toast.LENGTH_SHORT);
+                                        "Nächste Parklücke wird angefahren", Toast.LENGTH_LONG);
                                 toast.show();
                                 break;
                         }
@@ -72,10 +85,25 @@ public class MainActivity extends AppCompatActivity {
                 });
         btDialog = new BluetoothDialogFragment();
         MapFragment mapFragment = new MapFragment();
+        ParkFragment parkFragment = new ParkFragment();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.content, mapFragment, "MAPFRAGMENT");
+        ft.add(R.id.content, parkFragment, "PARKFRAGMENT");
+        ft.hide(parkFragment);
         ft.commit();
 }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        refreshTimer.schedule(refreshTimerTask,0,100);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        refreshTimer.cancel();
+    }
 
     @Override
     protected void onResume() {
@@ -99,15 +127,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void refreshMenu(){
-    new Timer().schedule(new TimerTask() {
-
-        @Override
-        public void run() {
-
-            runOnUiThread(new Runnable() {
-                public void run() {
                     BottomNavigationView bottomNavigationView = (BottomNavigationView)
                             findViewById(R.id.bottom_navigation);
+                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                     if (hmiModule != null)
                         if(hmiModule.isConnected()) {
                             if(hmiModule.getCurrentStatus() != null) {
@@ -122,12 +144,13 @@ public class MainActivity extends AppCompatActivity {
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(true);
                                         }
+                                        fragmentTransaction.hide((ParkFragment)getSupportFragmentManager().findFragmentByTag("PARKFRAGMENT"));
+                                        fragmentTransaction.commit();
                                         if ((((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler != null){
                                             String data = "MSG DATA";
                                             Message msg = (((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler.obtainMessage(0, data);
                                             msg.sendToTarget();
                                         }
-                                        getSupportFragmentManager().popBackStack();
                                         break;
                                     case PARK_NOW:
                                         bottomNavigationView.getMenu().getItem(0).setChecked(false);
@@ -144,6 +167,9 @@ public class MainActivity extends AppCompatActivity {
                                             Message msg = (((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler.obtainMessage(0, data);
                                             msg.sendToTarget();
                                         }
+                                        fragmentTransaction.show((ParkFragment)getSupportFragmentManager().findFragmentByTag("PARKFRAGMENT"));
+                                        fragmentTransaction.commit();
+                                        /**
                                         if(getSupportFragmentManager().getBackStackEntryCount()==0){
                                             FragmentTransaction ft = getSupportFragmentManager()
                                                     .beginTransaction();
@@ -151,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                                             ft.add(R.id.content, parkFragment);
                                             ft.addToBackStack(null);
                                             ft.commit();
-                                        }
+                                        }*/
                                         break;
                                     case PARK_THIS:
                                         bottomNavigationView.getMenu().getItem(0).setChecked(false);
@@ -163,6 +189,9 @@ public class MainActivity extends AppCompatActivity {
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(true);
                                         }
+                                        fragmentTransaction.show((ParkFragment)getSupportFragmentManager().findFragmentByTag("PARKFRAGMENT"));
+                                        fragmentTransaction.commit();
+                                        /**
                                         if(getSupportFragmentManager().getBackStackEntryCount()==0){
                                             FragmentTransaction ft = getSupportFragmentManager()
                                                     .beginTransaction();
@@ -171,10 +200,11 @@ public class MainActivity extends AppCompatActivity {
                                             ft.addToBackStack(null);
                                             ft.commit();
                                         }
+                                         */
                                         break;
                                     case PARKED:
-                                        bottomNavigationView.getMenu().getItem(0).setChecked(false);
-                                        bottomNavigationView.getMenu().getItem(1).setChecked(true);
+                                        bottomNavigationView.getMenu().getItem(0).setChecked(true);
+                                        bottomNavigationView.getMenu().getItem(1).setChecked(false);
                                         bottomNavigationView.getMenu().getItem(2).setChecked(false);
                                         bottomNavigationView.getMenu().getItem(0).setEnabled(false);
                                         bottomNavigationView.getMenu().getItem(1).setEnabled(true);
@@ -183,12 +213,13 @@ public class MainActivity extends AppCompatActivity {
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(false);
                                         }
+                                        fragmentTransaction.hide((ParkFragment)getSupportFragmentManager().findFragmentByTag("PARKFRAGMENT"));
+                                        fragmentTransaction.commit();
                                         if ((((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler != null){
                                             String data = "MSG DATA";
                                             Message msg = (((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler.obtainMessage(0, data);
                                             msg.sendToTarget();
                                         }
-                                        getSupportFragmentManager().popBackStack();
                                         break;
 
                                     case INACTIVE:
@@ -201,12 +232,13 @@ public class MainActivity extends AppCompatActivity {
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(true);
                                         }
+                                        fragmentTransaction.hide((ParkFragment)getSupportFragmentManager().findFragmentByTag("PARKFRAGMENT"));
+                                        fragmentTransaction.commit();
                                         if ((((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler != null){
                                             String data = "MSG DATA";
                                             Message msg = (((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler.obtainMessage(0, data);
                                             msg.sendToTarget();
                                         }
-                                        getSupportFragmentManager().popBackStack();
                                         break;
                                 }
                             }
@@ -218,8 +250,4 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                 }
-            });
-        }
-    }, 200, 100);
-}
 }

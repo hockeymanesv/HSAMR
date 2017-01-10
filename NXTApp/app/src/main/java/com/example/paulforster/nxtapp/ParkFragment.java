@@ -18,66 +18,87 @@ import static com.example.paulforster.nxtapp.MainActivity.hmiModule;
  */
 
 public class ParkFragment extends Fragment {
+    Timer refreshTimer;
+    TimerTask refreshTimerTask;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.park_fragment, container, false);
-        refreshDistance();
+        refreshTimer = new Timer();
+        refreshTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshDistance();
+                    }
+                });
+            }
+        };
         return view;
     }
 
-    public void refreshDistance(){
-        new Timer().schedule(new TimerTask() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshTimer.schedule(refreshTimerTask,0,100);
+    }
 
-            @Override
-            public void run() {
-                if (isVisible()) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        public void run() {
+    @Override
+    public void onPause() {
+        super.onPause();
+        refreshTimerTask.cancel();
+        refreshTimer.cancel();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        refreshTimer.purge();
+    }
+
+    public void refreshDistance(){
                             if (hmiModule != null) {
                                 if (hmiModule.isConnected()) {
                                     double visualDistance;
                                     visualDistance = (hmiModule.getPosition().getDistanceFront()
                                             - 300) * (3 - 0) / (50 - 300) + 0;
-                                    getActivity().findViewById(R.id.abstand_oben3)
+
+                                    getView().findViewById(R.id.abstand_oben3)
                                             .setAlpha((float) visualDistance);
-                                    getActivity().findViewById(R.id.abstand_oben2)
+                                    getView().findViewById(R.id.abstand_oben2)
                                             .setAlpha((float) visualDistance - 1);
-                                    getActivity().findViewById(R.id.abstand_oben1)
+                                    getView().findViewById(R.id.abstand_oben1)
                                             .setAlpha((float) visualDistance - 2);
 
                                     visualDistance = (hmiModule.getPosition().getDistanceFrontSide()
                                             - 300) * (3 - 0) / (50 - 300) + 0;
-                                    getActivity().findViewById(R.id.abstand_seiteoben3)
+                                    getView().findViewById(R.id.abstand_seiteoben3)
                                             .setAlpha((float) visualDistance);
-                                    getActivity().findViewById(R.id.abstand_seiteoben2)
+                                    getView().findViewById(R.id.abstand_seiteoben2)
                                             .setAlpha((float) visualDistance - 1);
-                                    getActivity().findViewById(R.id.abstand_seiteoben1)
+                                    getView().findViewById(R.id.abstand_seiteoben1)
                                             .setAlpha((float) visualDistance - 2);
 
                                     visualDistance = (hmiModule.getPosition().getDistanceBackSide()
                                             - 300) * (3 - 0) / (50 - 300) + 0;
-                                    getActivity().findViewById(R.id.abstand_seiteunten3)
+                                    getView().findViewById(R.id.abstand_seiteunten3)
                                             .setAlpha((float) visualDistance);
-                                    getActivity().findViewById(R.id.abstand_seiteunten2)
+                                    getView().findViewById(R.id.abstand_seiteunten2)
                                             .setAlpha((float) visualDistance - 1);
-                                    getActivity().findViewById(R.id.abstand_seiteunten1)
+                                    getView().findViewById(R.id.abstand_seiteunten1)
                                             .setAlpha((float) visualDistance - 2);
 
                                     visualDistance = (hmiModule.getPosition().getDistanceBack()
                                             - 300) * (3 - 0) / (50 - 300) + 0;
-                                    getActivity().findViewById(R.id.abstand_unten3)
+                                    getView().findViewById(R.id.abstand_unten3)
                                             .setAlpha((float) visualDistance);
-                                    getActivity().findViewById(R.id.abstand_unten2)
+                                    getView().findViewById(R.id.abstand_unten2)
                                             .setAlpha((float) visualDistance - 1);
-                                    getActivity().findViewById(R.id.abstand_unten1)
+                                    getView().findViewById(R.id.abstand_unten1)
                                             .setAlpha((float) visualDistance - 2);
                                 }
                             }
                         }
-                    });
-                }
-            }
-        }, 200, 100);
-    }
 }
