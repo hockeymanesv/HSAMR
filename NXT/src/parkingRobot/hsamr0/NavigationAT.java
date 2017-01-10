@@ -757,7 +757,9 @@ public class NavigationAT implements INavigation {
 	
 	private void detectParkingSlot(Pose pPose) {
 		if(testParking){
-			ParkingSlots.add( new ParkingSlot(0, new Point(30,0), new Point(74,0), ParkingSlotStatus.SUITABLE_FOR_PARKING, 0, line));
+			ParkingSlots.add(new ParkingSlot(0, new Point(30,0), new Point(74,0), ParkingSlotStatus.SUITABLE_FOR_PARKING, 0, 0));
+			ParkingSlots.add(new ParkingSlot(1, new Point(105,0), new Point(165,0), ParkingSlotStatus.SUITABLE_FOR_PARKING, 0, 0));
+			ParkingSlots.add(new ParkingSlot(2, new Point(180,15), new Point(180,60), ParkingSlotStatus.SUITABLE_FOR_PARKING, 0, 1));
 			testParking= false;
 		}
 		if(this.pose.getY() < 0.10 || this.pose.getX() > 1.70 || (Math.abs(this.pose.getX() - 0.90) < 0.30) && (Math.abs(this.pose.getY() - 0.45) < 0.05)){

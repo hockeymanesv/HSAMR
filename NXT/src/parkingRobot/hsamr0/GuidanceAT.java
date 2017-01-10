@@ -254,7 +254,7 @@ public class GuidanceAT {
 	static float parkNow_frontBoundery = 0;
 	
 	
-	static double parking_slot_width = 0;
+	static double parkNow_slot_width = 0;
 
 	
 	
@@ -455,7 +455,7 @@ public class GuidanceAT {
 					} 
 					park_out_slotrange = selected_Parkingslot_Slotrange;
 					
-					coefficienten = coefficient_calculation(selected_Parkingslot_Slotrange);
+					coefficienten = coefficient_calculation(selected_Parkingslot_Slotrange, 30.0, 1);
 					control.setCoefficients(coefficienten);
 					
 					// State transition check
@@ -522,7 +522,7 @@ public class GuidanceAT {
 					// State transition check
 					sm_park_this_lastStatus = sm_park_this_currentStatus;
 
-					if (perception.getBackSideSensorDistance() < 60){
+					if (perception.getBackSensorDistance() < 60){
 						sm_park_this_currentStatus = SM_park_this.DRIVE_TO_BEGINNING_OF_SLOTLINE;
 					}
 					// Leave action
@@ -647,7 +647,7 @@ public class GuidanceAT {
 							parkNow_frontBoundery = navigation.getPose().getY();
 						}
 						
-						parking_slot_width = Math.abs(parkNow_frontBoundery - parkNow_backBoundery);
+						parkNow_slot_width = Math.abs(parkNow_frontBoundery - parkNow_backBoundery);
 					}	
 					break;
 				case DRIVE_TO_SLOT_BEGINNING:
@@ -677,34 +677,45 @@ public class GuidanceAT {
 						coefficienten = null;
 					}
 					// While action;
-//					coefficienten = coefficient_calculation(parking_slot_width);
-
+					park_out_slotrange = parkNow_slot_width;
+					
+					coefficienten = coefficient_calculation(parkNow_slot_width, 30.0, 1);
+					control.setCoefficients(coefficienten);
+					
 					// State transition check
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
 					if(coefficienten != null){
 						sm_park_now_currentStatus = SM_park_now.PARKING_MANEUVER;
 					}
-
+	
 					// Leave action
 					if (sm_park_now_currentStatus != SM_park_now.PATH_GENERATOR) {
-						control.setCtrlMode(ControlMode.INACTIVE);
+						coefficienten = null;
 					}
 					break;
 				case PARKING_MANEUVER:
 					// Into action
 					if (sm_park_now_lastStatus != SM_park_now.PARKING_MANEUVER) {
-						control.setCtrlMode(ControlMode.LINE_CTRL);	
+						
+						robo_in_parkingmovement = true;
+						
+						kacke = 1;
+						control.setCtrlMode(ControlMode.PARK_CTRL);						
 					}
 					// While action
-					
+
 					// State transition check
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
-					// Leave action	
+					if(parkManeuver_finished){
+						
+						sm_park_now_currentStatus = SM_park_now.CORRECT_PARKING_POSE;    //////////////////////  verzweigen auf korrektur bei kollision
+					}
+					// Leave action
 					if (sm_park_now_currentStatus != SM_park_now.PARKING_MANEUVER) {
 						control.setCtrlMode(ControlMode.INACTIVE);
-					}	
+					}
 					break;
 				case CORRECT_PARKING_MANEUVER:
 					// Into action
@@ -724,17 +735,25 @@ public class GuidanceAT {
 				case CORRECT_PARKING_POSE:
 					// Into action
 					if (sm_park_now_lastStatus != SM_park_now.CORRECT_PARKING_POSE) {
-						control.setCtrlMode(ControlMode.LINE_CTRL);	
+						Sound.beepSequenceUp();
+
+						control.setAngularVelocity(0.0);		///// rad/s
+						control.setVelocity(-5.0);						///// cm/s
+						control.setCtrlMode(ControlMode.VW_CTRL);
 					}
 					// While action
-					
+
 					// State transition check
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
-					
-					// Leave action	
+
+					if (perception.getBackSensorDistance() < 60){
+						sm_park_now_currentStatus = SM_park_now.LOOKING_FOR_SLOTS;
+					}
+					// Leave action
 					if (sm_park_now_currentStatus != SM_park_now.CORRECT_PARKING_POSE) {
 						control.setCtrlMode(ControlMode.INACTIVE);
-					}	
+						currentStatus = CurrentStatus.PARKED;				///////777 leave PARK_THIS
+					}
 					break;
 				default:
 					break;
@@ -804,7 +823,7 @@ public class GuidanceAT {
 					}
 					
 					// While action;
-					coefficienten = coefficient_calculation(park_out_slotrange);
+					coefficienten = coefficient_calculation(park_out_slotrange, -30.0, -1);
 					control.setCoefficients(coefficienten);
 					
 					// State transition check
@@ -947,7 +966,7 @@ public class GuidanceAT {
 			LCD.drawString("Y (in cm): " + (navigation.getPose().getY() * 100), 0, 1);
 	//		LCD.drawString("B (in cm): " + (range_slotbeginning), 0, 1);			////////////////////////////
 			LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);
-			LCD.drawString("KACKE: " + (parkManeuver_finished), 0, 3);
+			LCD.drawString("KACKE: " + (dummy3), 0, 3);
 			LCD.drawString("XNEU: " + (dummy4), 0, 4);
 		} else if (!version /*&& coefficienten != null*/){
 			
@@ -982,11 +1001,25 @@ public class GuidanceAT {
 	
 	public static boolean getParkmovementInfo(){
 		return robo_in_parkingmovement;
+//		return true;
+		
 	}
 	
 	public static void test (boolean test, double test2){
 		dummy3 = test;
 		dummy4 = test2;
+	}
+	
+	public static boolean park_in_or_out(){
+		
+		boolean modus = false;
+		if(currentStatus == CurrentStatus.PARK_THIS || currentStatus == CurrentStatus.PARK_NOW){
+			modus = false;
+		} else if(currentStatus == CurrentStatus.PARKED){
+			modus = true;
+		}
+		
+		return modus;
 	}
 
 	// Polynom für Pfadgenerator berechnen
@@ -1000,11 +1033,11 @@ public class GuidanceAT {
 	 * 4.Bedingung: f'(Lückentiefe/2)=1 <-- Steigung des Polynoms zur halben Breite und halb abgefahrenen Strecke gleich 45°
 	 * 
 	 */
-	private static Matrix coefficient_calculation(double lueckenbreite) {
+	private static Matrix coefficient_calculation(double lueckenbreite, double lueckentiefe, double steigung) {
 	
 //	double lueckenbreite = 180;
-	double lueckentiefe = 30.0;
-	double steigung = 1.0;
+//	double lueckentiefe = 30.0;
+//	double steigung = 1.0;
 
 	double[][] A_Array = { { 0                              , 0                         , 0                 , 1 }, 
 						   { Math.pow(lueckentiefe, 3)      , Math.pow(lueckentiefe,2)  , lueckentiefe      , 1 },
