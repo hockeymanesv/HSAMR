@@ -120,9 +120,9 @@ public class ControlRST implements IControl {
 	/**
 	 * Path Finder
 	 */
-	static double x1 = 0.0022;
+	static double x1 = -0.0022;
 	static double x2 = -0.1;
-	static double x3 = 2.5;
+	static double x3 = -2.5;
 	static double x4 = 0.0;
 	static double d = 0.5; // Abtastabstand in cm
 	static double abtastx = 0.0; // x-Wert an dem abgetastet wird
@@ -554,7 +554,7 @@ public class ControlRST implements IControl {
 				double k=Math.PI*2.0/deltaPhi;
 				double r=k*hyp/Math.PI/2.0;
 				
-				double velocity = 4.5; // konstante Geschwindigkeit in cm/s
+				double velocity = 5.5; // konstante Geschwindigkeit in cm/s
 				double omega = velocity/r; // * 1000 wegen
 				// umrechnung zu s
 
@@ -574,8 +574,10 @@ public class ControlRST implements IControl {
 			driveToPose(destinationX, destinationY, destinationPhi);
 
 			if (intervalContains(0, 2, (navigation.getPose().getHeading() / Math.PI * 180))) {
-				beginningPark = true;
-				endParking = false;
+//				beginningPark = true;
+//				endParking = false;
+				Sound.beep();
+//				setCtrlMode(ControlMode.INACTIVE);
 				GuidanceAT.setParkmaneuverFinished();
 			}
 		}

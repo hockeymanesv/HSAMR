@@ -333,7 +333,7 @@ public class GuidanceAT {
 
 				// Into action
 				if (lastStatus != CurrentStatus.SCOUT) {
-					control.setCtrlMode(ControlMode.LINE_CTRL);
+					control.setCtrlMode(ControlMode.PARK_CTRL);
 					navigation.setDetectionState(true);	
 				}
 
@@ -947,7 +947,7 @@ public class GuidanceAT {
 			LCD.drawString("Y (in cm): " + (navigation.getPose().getY() * 100), 0, 1);
 	//		LCD.drawString("B (in cm): " + (range_slotbeginning), 0, 1);			////////////////////////////
 			LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);
-			LCD.drawString("KACKE: " + (dummy3), 0, 3);
+			LCD.drawString("KACKE: " + (parkManeuver_finished), 0, 3);
 			LCD.drawString("XNEU: " + (dummy4), 0, 4);
 		} else if (!version /*&& coefficienten != null*/){
 			
