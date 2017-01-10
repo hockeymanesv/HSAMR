@@ -176,18 +176,26 @@ public class GuidanceAT {
 	 * the actual state
 	 */
 	protected static SM_park_this sm_park_this_lastStatus = SM_park_this.CORRECT_PARKING_POSE;
-	
 	/**
-	 * 
+	 * represents the selected parking slot in PARK_THIS mode
 	 */
-	static ParkingSlot selected_Parking_Slot = null;			/////////////7 noch ordentlich beschriften
-	//static ParkingSlot selected_Parking_Slot = new ParkingSlot(ParkingSlots.size(), new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY), new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0);			/////////////7 noch ordentlich beschriften
-	
-	
-	static int selected_Parking_Slot_Num = 0;
+	static ParkingSlot park_this_selected_Parking_Slot = null;	
+	/**
+	 * represents the number of selected parking slot in PARK_THIS mode
+	 */
+	static int park_this_selected_Parking_Slot_Num = 0;
+	/**
+	 * represents the line of selected parking slot in PARK_THIS mode
+	 */
 	static Line selected_Parking_Slot_Line = line1;
+	/**
+	 * represents the range of selected parking slot in PARK_THIS mode
+	 */	
 	static double selected_Parkingslot_Slotrange = 0;
-	static Matrix coefficienten = null;
+	/**
+	 * represents the calculated coefficients of the a parking slot in PARK_THIS mode
+	 */	
+	static Matrix coefficients = null;
 	static boolean parkManeuver_finished = false;
 	
 	static boolean marker1 = false;
@@ -382,12 +390,12 @@ public class GuidanceAT {
 					sm_park_this_currentStatus = SM_park_this.DRIVE_TO_BEGINNING_OF_SLOTLINE;
 //					sm_park_this_currentStatus = SM_park_this.DRIVE_TO_SLOT_BEGINNING;		//Probeversuche
 					
-					selected_Parking_Slot_Num = hmi.getSelectedParkingSlot();
-					selected_Parking_Slot = navigation.getParkingSlots()[selected_Parking_Slot_Num];
-					selected_Parking_Slot_Line = map[selected_Parking_Slot.getLine()];							////////////////////////
-					range_slotbeginning = (selected_Parking_Slot.getBackBoundaryPosition().getX() - 10);
+					park_this_selected_Parking_Slot_Num = hmi.getSelectedParkingSlot();
+					park_this_selected_Parking_Slot = navigation.getParkingSlots()[park_this_selected_Parking_Slot_Num];
+					selected_Parking_Slot_Line = map[park_this_selected_Parking_Slot.getLine()];							////////////////////////
+					range_slotbeginning = (park_this_selected_Parking_Slot.getBackBoundaryPosition().getX() - 10);
 					
-					dummy2 = selected_Parking_Slot.getLine();
+					dummy2 = park_this_selected_Parking_Slot.getLine();
 				}
 				
 				// While action
@@ -448,26 +456,26 @@ public class GuidanceAT {
 					}
 
 					// While action;
-					if(selected_Parking_Slot.getLine() % 2 == 0){
-						selected_Parkingslot_Slotrange = Math.abs(selected_Parking_Slot.getBackBoundaryPosition().getX() - selected_Parking_Slot.getFrontBoundaryPosition().getX());
-					} else if (selected_Parking_Slot.getLine() % 2 == 1){
-						selected_Parkingslot_Slotrange = Math.abs(selected_Parking_Slot.getBackBoundaryPosition().getY() - selected_Parking_Slot.getFrontBoundaryPosition().getY());
+					if(park_this_selected_Parking_Slot.getLine() % 2 == 0){
+						selected_Parkingslot_Slotrange = Math.abs(park_this_selected_Parking_Slot.getBackBoundaryPosition().getX() - park_this_selected_Parking_Slot.getFrontBoundaryPosition().getX());
+					} else if (park_this_selected_Parking_Slot.getLine() % 2 == 1){
+						selected_Parkingslot_Slotrange = Math.abs(park_this_selected_Parking_Slot.getBackBoundaryPosition().getY() - park_this_selected_Parking_Slot.getFrontBoundaryPosition().getY());
 					} 
 					park_out_slotrange = selected_Parkingslot_Slotrange;
 					
-					coefficienten = coefficient_calculation(selected_Parkingslot_Slotrange, 30.0, 1);
-					control.setCoefficients(coefficienten);
+					coefficients = coefficient_calculation(selected_Parkingslot_Slotrange, 30.0, 1);
+					control.setCoefficients(coefficients);
 					
 					// State transition check
 					sm_park_this_lastStatus = sm_park_this_currentStatus;
 					
-					if(coefficienten != null){
+					if(coefficients != null){
 						sm_park_this_currentStatus = SM_park_this.PARKING_MANEUVER;
 					}
 
 					// Leave action
 					if (sm_park_this_currentStatus != SM_park_this.PATH_GENERATOR) {
-						coefficienten = null;
+						coefficients = null;
 					}
 					break;
 				case PARKING_MANEUVER:
@@ -674,24 +682,24 @@ public class GuidanceAT {
 				case PATH_GENERATOR:
 					// Into action
 					if (sm_park_now_lastStatus != SM_park_now.PATH_GENERATOR) {
-						coefficienten = null;
+						coefficients = null;
 					}
 					// While action;
 					park_out_slotrange = parkNow_slot_width;
 					
-					coefficienten = coefficient_calculation(parkNow_slot_width, 30.0, 1);
-					control.setCoefficients(coefficienten);
+					coefficients = coefficient_calculation(parkNow_slot_width, 30.0, 1);
+					control.setCoefficients(coefficients);
 					
 					// State transition check
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
-					if(coefficienten != null){
+					if(coefficients != null){
 						sm_park_now_currentStatus = SM_park_now.PARKING_MANEUVER;
 					}
 	
 					// Leave action
 					if (sm_park_now_currentStatus != SM_park_now.PATH_GENERATOR) {
-						coefficienten = null;
+						coefficients = null;
 					}
 					break;
 				case PARKING_MANEUVER:
@@ -823,19 +831,19 @@ public class GuidanceAT {
 					}
 					
 					// While action;
-					coefficienten = coefficient_calculation(park_out_slotrange, -30.0, -1);
-					control.setCoefficients(coefficienten);
+					coefficients = coefficient_calculation(park_out_slotrange, -30.0, -1);
+					control.setCoefficients(coefficients);
 					
 					// State transition check
 					sm_park_out_lastStatus = sm_park_out_currentStatus;
 					
-					if(coefficienten != null){
+					if(coefficients != null){
 						sm_park_out_currentStatus = SM_park_out.OUTPARKING_MANEUVER;
 					}
 
 					// Leave action
 					if (sm_park_out_currentStatus != SM_park_out.PATH_GENERATOR) {
-						coefficienten = null;
+						coefficients = null;
 					}
 					break;
 				case OUTPARKING_MANEUVER:
@@ -961,13 +969,13 @@ public class GuidanceAT {
 		
 		if(version){
 		
-			LCD.drawString("###PAULS TEST###", 0, 5);
+			
 			LCD.drawString("X (in cm): " + (navigation.getPose().getX() * 100), 0, 0);    /////////////////////////////////
 			LCD.drawString("Y (in cm): " + (navigation.getPose().getY() * 100), 0, 1);
 	//		LCD.drawString("B (in cm): " + (range_slotbeginning), 0, 1);			////////////////////////////
 			LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);
-			LCD.drawString("KACKE: " + (dummy3), 0, 3);
-			LCD.drawString("XNEU: " + (dummy4), 0, 4);
+			LCD.drawString("Status: " + (currentStatus), 0, 3);
+			LCD.drawString(": " + (dummy4), 0, 4);
 		} else if (!version /*&& coefficienten != null*/){
 			
 //			LCD.drawString("A: " + (coefficienten.get(0, 0)), 0 ,0);    /////////////////////////////////
@@ -995,14 +1003,15 @@ public class GuidanceAT {
 		dummy = line;					/////////////////////////////////
 	}
 	
+	/**
+	 * 
+	 */
 	public static void setParkmaneuverFinished(){
 		parkManeuver_finished = true;
 	}
 	
 	public static boolean getParkmovementInfo(){
 		return robo_in_parkingmovement;
-//		return true;
-		
 	}
 	
 	public static void test (boolean test, double test2){

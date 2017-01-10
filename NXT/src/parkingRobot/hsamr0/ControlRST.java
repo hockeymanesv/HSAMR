@@ -169,7 +169,7 @@ public class ControlRST implements IControl {
 
 	// Speed parameters
 	double velocity = 5.0;// 3;//0 //in cm/s
-	double angularVelocity = 0;// Math.PI/6;// 3;//0 //in rad/s
+	double angularVelocity = 0.5;// Math.PI/6;// 3;//0 //in rad/s
 
 	// Position parameters
 	Pose startPosition = new Pose();
@@ -429,11 +429,11 @@ public class ControlRST implements IControl {
 			anfangy = navigation.getPose().getY(); // Einheit m
 			destinationX = anfangx;
 			destinationY = anfangy;
-			if (GuidanceAT.getParkmovementInfo()) {
+			if (!GuidanceAT.park_in_or_out()) {
 				// if (inOrOut) {
 				destinationPhi = -(Math.PI / 2.0 - Math.atan(3 * x1 * anfangx * anfangx + x2 * 2 * anfangx + x3));
 			}
-			if (!GuidanceAT.getParkmovementInfo()) {
+			if (GuidanceAT.park_in_or_out()) {
 				// if (!inOrOut) {
 				destinationPhi = Math.PI / 2.0 + Math.atan(3 * x1 * anfangx * anfangx + x2 * 2 * anfangx + x3);
 			}
@@ -500,7 +500,7 @@ public class ControlRST implements IControl {
 			drive(velocity, omega);
 
 			// Stoppbedingungen
-			boolean markerx = intervalContains(0.25, 0.3, neux);
+			boolean markerx = intervalContains(0.29, 0.3, neux);
 			if (markerx) {
 				endParking = true;
 			}
@@ -547,12 +547,14 @@ public class ControlRST implements IControl {
 
 			// Wendung in der Mitte des Pfads, jeweils fuer einparken und
 			// ausparken
-			// if (GuidanceAT.getParkmovementInfo())
-			if (abtastx < 15 && GuidanceAT.getParkmovementInfo()) {// eiparken
+			// if (GuidanceAT.park_in_or_out())
+			if (abtastx < 15 && !GuidanceAT.park_in_or_out()) {// eiparken
 				deltaPhi = (phiForward - phi);
-			} else if (abtastx < 15 && !GuidanceAT.getParkmovementInfo()) {// ausparken
+			} else if (abtastx < 15 && GuidanceAT.park_in_or_out()) {// ausparken
 				deltaPhi = -(phiForward - phi);
-			} else if (abtastx > 15 && !GuidanceAT.getParkmovementInfo()) {// ausparken
+			} else if (abtastx > 15 && GuidanceAT.park_in_or_out()) {// ausparken
+				deltaPhi = -(phiForward - phi);
+			}  else if (abtastx > 15 && !GuidanceAT.park_in_or_out()) {// einparken
 				deltaPhi = (phiForward - phi);
 			}
 
@@ -569,7 +571,7 @@ public class ControlRST implements IControl {
 			drive(velocity, omega);
 
 			// Stoppbedingungen
-			boolean markerxIn = intervalContains(0.29, 0.3, neux);
+			boolean markerxIn = intervalContains(0.28, 0.31, neux);
 			boolean markerxOut = intervalContains(-0.3, -0.29, neux);
 			if (markerxIn || markerxOut) {
 				endParking = true;

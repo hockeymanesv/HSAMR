@@ -150,6 +150,9 @@ public class NavigationAT implements INavigation {
 	boolean frontSensorFinished = false;
 	boolean angleOverwrite = false;
 	boolean newSlot = false;
+	boolean newSlotBack = false;
+	boolean newSlotFront = false;
+	boolean obstruction = true;
 	boolean existingParkingSlot = false;
 	double aMax = 0;
 	double aMin = 0;
@@ -162,11 +165,16 @@ public class NavigationAT implements INavigation {
 	float frontFrontBoundaryX;
 	float frontFrontBoundaryY;
 	float backBoundaryPositionX;
+	float backBoundaryPositionXBack;
+	float backBoundaryPositionXFront;
 	float backBoundaryPositionY;
 	float frontBoundaryPositionX;
+	float frontBoundaryPositionXBack;
+	float frontBoundaryPositionXFront;
 	float frontBoundaryPositionY;
 	int line = 0;
 	int i = 0;
+	int j = 0;
 	Point test;
 	double backBackError = 0;
 	double frontBackError = 0;
@@ -175,7 +183,7 @@ public class NavigationAT implements INavigation {
 	double ParkingSlotError = 0;
 	int measurementQuality = 0;
 	ParkingSlotStatus ParkingSlotStatus;
-	boolean testParking = false;
+	boolean testParking = true;
 	
 	/**
 	 * map array of line references, whose corresponding lines form a closed
@@ -458,13 +466,13 @@ public class NavigationAT implements INavigation {
 		 if (angleResult > Math.PI*7/4) { 
 			 angleResult = angleResult -Math.PI*2;
 		 }
-		
+		 
 		 angleMouse = this.mouseOdoMeasurement.getUSum()/MOUSE_SENSOR_OFFSET; //Einheiten überlegen
 		 xMouse = Math.cos(this.mouseOdoMeasurement.getVSum()) / 1000;
 		 yMouse = Math.sin(this.mouseOdoMeasurement.getVSum()) / 1000;
 		 
 		 
-		 if(onLine){
+		 if(!GuidanceAT.getParkmovementInfo()){
 			if(Math.abs(xResult - 1.3) < 0.15 && Math.abs(yResult) < 0.15){
 				if(angleResult > aMax){
 					aMax = angleResult;
@@ -762,7 +770,8 @@ public class NavigationAT implements INavigation {
 			ParkingSlots.add(new ParkingSlot(2, new Point(180,15), new Point(180,60), ParkingSlotStatus.SUITABLE_FOR_PARKING, 0, 1));
 			testParking= false;
 		}
-		if(this.pose.getY() < 0.10 || this.pose.getX() > 1.70 || (Math.abs(this.pose.getX() - 0.90) < 0.30) && (Math.abs(this.pose.getY() - 0.45) < 0.05)){
+		if(line == 0 || line == 1){
+//		if(this.pose.getY() < 0.10 || this.pose.getX() > 1.70 || (Math.abs(this.pose.getX() - 0.90) < 0.30) && (Math.abs(this.pose.getY() - 0.45) < 0.05)){
 			float poseX= this.pose.getX() * 100;
 			float poseY= this.pose.getY() * 100;
 			if(this.frontSideSensorDistance > 200  && !possibleParkingSlot){
@@ -875,85 +884,266 @@ public class NavigationAT implements INavigation {
 			
 		}
 		
-//		if((Math.abs(this.pose.getX() - 0.90) < 0.30) && (Math.abs(this.pose.getY() - 0.30) < 0.05)){
-////			if(false){
-//			float poseX= this.pose.getX() * 100;
-//			float poseY= this.pose.getY() * 100;
-//			if(this.frontSideSensorDistance < 150  && !possibleParkingSlot){
-//				frontBackBoundaryX = poseX;
-//				frontBackBoundaryY = poseY;
-//				frontBackBoundaryX += xFrontBouandaryOffset();
-//				frontBackBoundaryY += yFrontBouandaryOffset();
-//				//Sound.twoBeeps();
-//				possibleParkingSlot = true;
+	if(false){	
+//	if(line == 0 || line == 1){
+//	if(this.pose.getY() < 0.10 || this.pose.getX() > 1.70 || (Math.abs(this.pose.getX() - 0.90) < 0.30) && (Math.abs(this.pose.getY() - 0.45) < 0.05)){
+		float poseX= this.pose.getX() * 100;
+		float poseY= this.pose.getY() * 100;
+//		if(this.frontSideSensorDistance > 200  && !possibleParkingSlot){
+//			frontBackBoundaryX = poseX;
+//			frontBackBoundaryY = poseY;
+//			frontBackBoundaryX += xFrontBouandaryOffset();
+//			frontBackBoundaryY += yFrontBouandaryOffset();
+//			//Sound.twoBeeps();
+//			possibleParkingSlot = true;
+//			frontBackError = errorX + errorY +errorAngle;
+//		}
+		
+		if(this.backSideSensorDistance > 200 && !finishBack){
+			
+			backBackBoundaryX = poseX;
+			backBackBoundaryY = poseY;
+			backBackBoundaryX += xBackBouandaryOffset();
+			backBackBoundaryY += yBackBouandaryOffset();
+			finishBack = true;
+			backBoundaryPositionX = backBackBoundaryX;
+			backBoundaryPositionY = backBackBoundaryY;
+			backBackError = errorX + errorY +errorAngle;
+		}
+		
+		if(this.frontSideSensorDistance < 150 && finishBack){
+			frontFrontBoundaryX = poseX;
+			frontFrontBoundaryY = poseY;
+			frontFrontBoundaryX += xFrontBouandaryOffset();
+			frontFrontBoundaryY += yFrontBouandaryOffset();
+//			possibleParkingSlot = false;
+//			frontSensorFinished = true;
+			frontFrontError = errorX + errorY +errorAngle;
+			
+			finishBack = false;
+			frontBoundaryPositionX = frontFrontBoundaryX;
+			frontBoundaryPositionY = frontFrontBoundaryY;
+			backFrontError = errorX + errorY +errorAngle;
+			ParkingSlotError = (frontFrontError + backBackError) / 2;
+			
+			
+			if(ParkingSlotError < 0.05){
+				measurementQuality = 1;
+			}else if(ParkingSlotError < 0.10){
+				measurementQuality = 2;
+			}else if(ParkingSlotError < 0.15){
+				measurementQuality = 3;
+			}else if(ParkingSlotError < 0.20){
+				measurementQuality = 4;
+			}else if(ParkingSlotError < 0.25){
+				measurementQuality = 5;
+			}else if(ParkingSlotError < 0.30){
+				measurementQuality = 6;
+			}else if(ParkingSlotError < 0.35){
+				measurementQuality = 7;
+			}else if(ParkingSlotError < 0.40){
+				measurementQuality = 8;
+			}else if(ParkingSlotError < 0.45){
+				measurementQuality = 9;
+			}else{
+				measurementQuality = 10;
+			}
+			
+			if((Math.abs(frontBoundaryPositionX - backBoundaryPositionX) > 45 || Math.abs(frontBoundaryPositionY - backBoundaryPositionY) > 45) && measurementQuality < 5){
+				ParkingSlotStatus = ParkingSlotStatus.SUITABLE_FOR_PARKING;
+			}else{
+				ParkingSlotStatus = ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING;
+			}
+			newSlot = true;
+			i=0;
+			
+			
+		}
+		
+//		if(this.backSideSensorDistance < 150 && finishBack && frontSensorFinished && !possibleParkingSlot){
+//			backFrontBoundaryX = poseX;
+//			backFrontBoundaryY = poseY;
+//			backFrontBoundaryX += xBackBouandaryOffset();
+//			backFrontBoundaryY += yBackBouandaryOffset();
+//			finishBack = false;
+//			frontBoundaryPositionX = (frontFrontBoundaryX + backFrontBoundaryX)/2;
+//			frontBoundaryPositionY = (frontFrontBoundaryY + backFrontBoundaryY)/2;
+//			backFrontError = errorX + errorY +errorAngle;
+//			ParkingSlotError = (frontFrontError + backFrontError + frontBackError + backBackError) / 4;
+//			
+//			
+//			if(ParkingSlotError < 0.05){
+//				measurementQuality = 1;
+//			}else if(ParkingSlotError < 0.10){
+//				measurementQuality = 2;
+//			}else if(ParkingSlotError < 0.15){
+//				measurementQuality = 3;
+//			}else if(ParkingSlotError < 0.20){
+//				measurementQuality = 4;
+//			}else if(ParkingSlotError < 0.25){
+//				measurementQuality = 5;
+//			}else if(ParkingSlotError < 0.30){
+//				measurementQuality = 6;
+//			}else if(ParkingSlotError < 0.35){
+//				measurementQuality = 7;
+//			}else if(ParkingSlotError < 0.40){
+//				measurementQuality = 8;
+//			}else if(ParkingSlotError < 0.45){
+//				measurementQuality = 9;
+//			}else{
+//				measurementQuality = 10;
 //			}
 //			
-//			if(this.backSideSensorDistance < 150 && possibleParkingSlot && !finishBack){
-//				
-//				backBackBoundaryX = poseX;
-//				backBackBoundaryY = poseY;
-//				backBackBoundaryX += xBackBouandaryOffset();
-//				backBackBoundaryY += yBackBouandaryOffset();
-//				finishBack = true;
-//				backBoundaryPositionX = (frontBackBoundaryX + backBackBoundaryX)/2;
-//				backBoundaryPositionY = (frontBackBoundaryY + backBackBoundaryY)/2;
-//				
+//			if((Math.abs(frontBoundaryPositionX - backBoundaryPositionX) > 45 || Math.abs(frontBoundaryPositionY - backBoundaryPositionY) > 45) && measurementQuality < 5){
+//				ParkingSlotStatus = ParkingSlotStatus.SUITABLE_FOR_PARKING;
+//			}else{
+//				ParkingSlotStatus = ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING;
 //			}
-//			
-//			if(this.frontSideSensorDistance >200 && possibleParkingSlot){
-//				frontFrontBoundaryX = poseX;
-//				frontFrontBoundaryY = poseY;
-//				frontFrontBoundaryX += xFrontBouandaryOffset();
-//				frontFrontBoundaryY += yFrontBouandaryOffset();
-//				possibleParkingSlot = false;
-//				frontSensorFinished = true;
-//			}
-//			
-//			if(this.backSideSensorDistance >200 && finishBack && frontSensorFinished && !possibleParkingSlot){
-//				backFrontBoundaryX = poseX;
-//				backFrontBoundaryY = poseY;
-//				backFrontBoundaryX += xBackBouandaryOffset();
-//				backFrontBoundaryY += yBackBouandaryOffset();
-//				finishBack = false;
-//				frontBoundaryPositionX = (frontFrontBoundaryX + backFrontBoundaryX)/2;
-//				frontBoundaryPositionY = (frontFrontBoundaryY + backFrontBoundaryY)/2;
-//				
-//				newSlot = true;
-//				i=0;
-//				
-//				
-//			}
-//			
-//			if(newSlot){
-//				if(existingParkingSlot){
-//					if(Math.abs(ParkingSlots.get(i).getBackBoundaryPosition().getX() - backBoundaryPositionX) < 5 && Math.abs(ParkingSlots.get(i).getBackBoundaryPosition().getY() - backBoundaryPositionY) < 5){
-//						ParkingSlots.get(i).setBackBoundaryPosition(new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY));
-//						ParkingSlots.get(i).setFrontBoundaryPosition(new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY));
-//						newSlot = false;
-//						Sound.twoBeeps();
-//					}
-//					
-//					if(newSlot && (i==(ParkingSlots.size() - 1) || i==0)){
-//						//ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY), new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0));
-//						ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point(backBoundaryPositionX,backBoundaryPositionY), new Point(frontBoundaryPositionX,frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0, line));
-//						Sound.beepSequenceUp();
-//						newSlot = false;
-//						existingParkingSlot = true;
-//					} 
-//				}
-//				
-//				
-//				if(!existingParkingSlot){
-//					ParkingSlots.add( new ParkingSlot(0, new Point(backBoundaryPositionX,backBoundaryPositionY), new Point(frontBoundaryPositionX,frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0, line));
-//					Sound.beepSequenceUp();
-//					newSlot = false;
-//					existingParkingSlot = true;
-//				} 
-//				i=i+1;
-//			}
+//			newSlot = true;
+//			i=0;
 //			
 //			
 //		}
+		
+		if(newSlot){
+			if(existingParkingSlot){
+				if((Math.abs(ParkingSlots.get(i).getBackBoundaryPosition().getX() - backBoundaryPositionX) < 10 && Math.abs(ParkingSlots.get(i).getBackBoundaryPosition().getY() - backBoundaryPositionY) < 10) && ParkingSlots.get(i).getMeasurementQuality() < measurementQuality){
+					ParkingSlots.get(i).setBackBoundaryPosition(new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY));
+					ParkingSlots.get(i).setFrontBoundaryPosition(new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY));
+					ParkingSlots.get(i).setMeasurementQuality(measurementQuality);
+					ParkingSlots.get(i).setStatus(ParkingSlotStatus);
+					newSlot = false;
+//					Sound.twoBeeps();
+				}
+				
+				if(newSlot && (i==(ParkingSlots.size() - 1) || i==0)){
+					//ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY), new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0));
+					ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point(backBoundaryPositionX,backBoundaryPositionY), new Point(frontBoundaryPositionX,frontBoundaryPositionY), ParkingSlotStatus, measurementQuality, line));
+//					Sound.beepSequenceUp();
+					newSlot = false;
+					existingParkingSlot = true;
+				} 
+			}
+			
+			
+			if(!existingParkingSlot){
+				ParkingSlots.add( new ParkingSlot(0, new Point(backBoundaryPositionX,backBoundaryPositionY), new Point(frontBoundaryPositionX,frontBoundaryPositionY), ParkingSlotStatus, measurementQuality, line));
+//				Sound.beepSequenceUp();
+				newSlot = false;
+				existingParkingSlot = true;
+			} 
+			i=i+1;
+		}
+		
+		
+	}
+		if(line == 4 && obstruction){
+//			if(true){
+			float poseX= this.pose.getX() * 100;
+			if(this.frontSideSensorDistance < 150  && !possibleParkingSlot){
+				frontBackBoundaryX = poseX;
+				frontBackBoundaryX += xFrontBouandaryOffset();
+				//Sound.twoBeeps();
+				possibleParkingSlot = true;
+			}
+			
+			if(this.backSideSensorDistance < 150 && possibleParkingSlot && !finishBack){
+				
+				backBackBoundaryX = poseX;
+				backBackBoundaryX += xBackBouandaryOffset();
+				finishBack = true;
+				backBoundaryPositionX = (frontBackBoundaryX + backBackBoundaryX)/2;
+				backBoundaryPositionY = 30;
+				
+			}
+			
+			if(this.frontSideSensorDistance > 200 && possibleParkingSlot){
+				frontFrontBoundaryX = poseX;
+				frontFrontBoundaryX += xFrontBouandaryOffset();
+				possibleParkingSlot = false;
+				frontSensorFinished = true;
+			}
+			
+			if(this.backSideSensorDistance > 200 && finishBack && frontSensorFinished && !possibleParkingSlot){
+				backFrontBoundaryX = poseX;
+				backFrontBoundaryX += xBackBouandaryOffset();
+				finishBack = false;
+				frontBoundaryPositionX = (frontFrontBoundaryX + backFrontBoundaryX)/2;
+				frontBoundaryPositionY = 30;
+				
+				if(!(Math.abs(backBoundaryPositionX - 130) < 5)){
+					newSlotBack=true;
+					frontBoundaryPositionXBack = backBoundaryPositionX;
+					backBoundaryPositionXBack = 130;
+				}
+				if(!(Math.abs(frontBoundaryPositionX - 50) < 5)){
+					newSlotFront = true;
+					frontBoundaryPositionXFront = 50;
+					backBoundaryPositionXFront = frontBoundaryPositionX;
+				}
+				i=0;
+				j=0;
+				
+				
+			}
+			
+			if(newSlotBack){
+				if(existingParkingSlot){
+					if(Math.abs(ParkingSlots.get(i).getBackBoundaryPosition().getX() - backBoundaryPositionXBack) < 10 && Math.abs(ParkingSlots.get(i).getBackBoundaryPosition().getY() - backBoundaryPositionY) < 10){
+						ParkingSlots.get(i).setBackBoundaryPosition(new Point((float)backBoundaryPositionXBack,(float)backBoundaryPositionY));
+						ParkingSlots.get(i).setFrontBoundaryPosition(new Point((float)frontBoundaryPositionXBack,(float)frontBoundaryPositionY));
+						newSlotBack = false;
+//						Sound.twoBeeps();
+					}
+					
+					if(newSlotBack && (i==(ParkingSlots.size() - 1) || i==0)){
+						//ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY), new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0));
+						ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point(backBoundaryPositionXBack,backBoundaryPositionY), new Point(frontBoundaryPositionXBack,frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0, line));
+//						Sound.twoBeeps();
+						newSlotBack = false;
+						existingParkingSlot = true;
+					} 
+				}
+				
+				
+				if(!existingParkingSlot){
+					ParkingSlots.add( new ParkingSlot(0, new Point(backBoundaryPositionXBack,30), new Point(frontBoundaryPositionXBack,30), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0, line));
+					newSlotBack = false;
+					existingParkingSlot = true;
+//					Sound.beepSequenceUp();
+				} 
+				i=i+1;
+			}
+			
+			if(newSlotFront){
+				if(existingParkingSlot){
+					if(Math.abs(ParkingSlots.get(j).getBackBoundaryPosition().getX() - backBoundaryPositionXFront) < 5 && Math.abs(ParkingSlots.get(j).getBackBoundaryPosition().getY() - backBoundaryPositionY) < 5){
+						ParkingSlots.get(j).setBackBoundaryPosition(new Point((float)backBoundaryPositionXFront,(float)backBoundaryPositionY));
+						ParkingSlots.get(j).setFrontBoundaryPosition(new Point((float)frontBoundaryPositionXFront,(float)frontBoundaryPositionY));
+						newSlotFront = false;
+//						Sound.twoBeeps();
+					}
+					
+					if(newSlotFront && (j==(ParkingSlots.size() - 1) || j==0)){
+						//ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY), new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0));
+						ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point(backBoundaryPositionXFront,backBoundaryPositionY), new Point(frontBoundaryPositionXFront,frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0, line));
+//						Sound.beepSequenceUp();
+						newSlotFront = false;
+						existingParkingSlot = true;
+					} 
+				}
+				
+				
+				if(!existingParkingSlot){
+					ParkingSlots.add( new ParkingSlot(0, new Point(backBoundaryPositionXFront,30), new Point(frontBoundaryPositionXFront,30), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0, line));
+//					Sound.beepSequenceUp();
+					newSlotFront = false;
+					existingParkingSlot = true;
+				} 
+				j=j+1;
+			}
+			
+		}
 		 // has to be implemented by students 
 	} 
 	
