@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentTransaction;
@@ -120,7 +121,11 @@ public class MainActivity extends AppCompatActivity {
                                         bottomNavigationView.getMenu().getItem(2).setEnabled(true);
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(true);
-                                            imageView.clearAnimation();
+                                        }
+                                        if ((((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler != null){
+                                            String data = "MSG DATA";
+                                            Message msg = (((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler.obtainMessage(0, data);
+                                            msg.sendToTarget();
                                         }
                                         getSupportFragmentManager().popBackStack();
                                         break;
@@ -133,6 +138,11 @@ public class MainActivity extends AppCompatActivity {
                                         bottomNavigationView.getMenu().getItem(2).setEnabled(true);
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(true);
+                                        }
+                                        if ((((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler != null){
+                                            String data = "MSG DATA";
+                                            Message msg = (((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler.obtainMessage(0, data);
+                                            msg.sendToTarget();
                                         }
                                         if(getSupportFragmentManager().getBackStackEntryCount()==0){
                                             FragmentTransaction ft = getSupportFragmentManager()
@@ -172,9 +182,12 @@ public class MainActivity extends AppCompatActivity {
 
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(false);
-                                            imageView.clearAnimation();
                                         }
-
+                                        if ((((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler != null){
+                                            String data = "MSG DATA";
+                                            Message msg = (((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler.obtainMessage(0, data);
+                                            msg.sendToTarget();
+                                        }
                                         getSupportFragmentManager().popBackStack();
                                         break;
 
@@ -187,14 +200,18 @@ public class MainActivity extends AppCompatActivity {
                                         bottomNavigationView.getMenu().getItem(2).setEnabled(true);
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(true);
-                                            imageView.clearAnimation();
+                                        }
+                                        if ((((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler != null){
+                                            String data = "MSG DATA";
+                                            Message msg = (((MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT"))).mHandler.obtainMessage(0, data);
+                                            msg.sendToTarget();
                                         }
                                         getSupportFragmentManager().popBackStack();
                                         break;
                                 }
                             }
                         } else {
-                            for(int i = 0; i<4; i++){
+                            for(int i = 0; i<3; i++){
                                 bottomNavigationView.getMenu().getItem(i).setChecked(false);
                                 bottomNavigationView.getMenu().getItem(i).setEnabled(false);
                                 getSupportFragmentManager().popBackStack();

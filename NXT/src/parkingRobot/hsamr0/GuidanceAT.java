@@ -333,7 +333,7 @@ public class GuidanceAT {
 
 				// Into action
 				if (lastStatus != CurrentStatus.SCOUT) {
-					control.setCtrlMode(ControlMode.PARK_CTRL);
+					control.setCtrlMode(ControlMode.LINE_CTRL);
 					navigation.setDetectionState(true);	
 				}
 
@@ -942,7 +942,7 @@ public class GuidanceAT {
 		
 		if(version){
 		
-			
+			LCD.drawString("###PAULS TEST###", 0, 5);
 			LCD.drawString("X (in cm): " + (navigation.getPose().getX() * 100), 0, 0);    /////////////////////////////////
 			LCD.drawString("Y (in cm): " + (navigation.getPose().getY() * 100), 0, 1);
 	//		LCD.drawString("B (in cm): " + (range_slotbeginning), 0, 1);			////////////////////////////

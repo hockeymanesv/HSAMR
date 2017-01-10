@@ -103,6 +103,7 @@ public interface INavigation {
 			 */
 			NOT_SUITABLE_FOR_PARKING
 		}
+		
 		/**
 		 * characterization of the parking slot measurement with the defined state value.
 		 * Per default is the parking slot not suitable.
@@ -113,8 +114,10 @@ public interface INavigation {
 		 */
 		int measurementQuality;
 		
+		int line;
+		
 		// Constructor
-
+		
 		/**
 		 * generate a ParkingSlot object without initialization of data members.
 		 */
@@ -130,12 +133,13 @@ public interface INavigation {
 		 * @param slotStatus			 characterization of the parking slot measurement
 		 * @param slotMeasurementQuality quality of parking slot measurement
 		 */
-		public ParkingSlot(int ID, Point backBoundaryPosition, Point frontBoundaryPosition, ParkingSlotStatus slotStatus, int slotMeasurementQuality){
+		public ParkingSlot(int ID, Point backBoundaryPosition, Point frontBoundaryPosition, ParkingSlotStatus slotStatus, int slotMeasurementQuality, int line){
 			this.ID     				= ID;
 			this.backBoundaryPosition  	= backBoundaryPosition;
 			this.frontBoundaryPosition	= frontBoundaryPosition;
 			this.setStatus(slotStatus);		
 			this.setMeasurementQuality(slotMeasurementQuality);
+			this.line = line;
 		}
 		
 		// Set methods
@@ -173,6 +177,10 @@ public interface INavigation {
 			this.measurementQuality = slotMeasurementQuality;
 		}
 		
+		public void setLine(int line){
+			this.line = line;
+		}
+		
 		
 		// Get methods
 		
@@ -206,6 +214,11 @@ public interface INavigation {
 		public int getMeasurementQuality() {
 			return measurementQuality;
 		}
-
-	}	
+		
+		public int getLine() {
+			return line;
+		}
+	}
+	
+	public int getCurrentLine();
 }

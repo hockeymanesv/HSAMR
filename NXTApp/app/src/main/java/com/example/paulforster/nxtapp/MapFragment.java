@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,9 @@ public class MapFragment extends Fragment {
     private int noSlots = 0;
     ArrayList<IAndroidHmi.ParkingSlot> parkingslotArrayList = new ArrayList<>();
     ArrayList<ImageView> imageviewArrayList = new ArrayList<>();
+
+    Handler mHandler = null;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -186,19 +190,51 @@ public class MapFragment extends Fragment {
                                                         animation.setInterpolator(new LinearInterpolator());
                                                         animation.setRepeatCount(Animation.INFINITE);
                                                         animation.setRepeatMode(Animation.REVERSE);
-                                                        slotMarker.startAnimation(animation);
-                                                        for(ImageView imageView : imageviewArrayList){
-                                                            if(imageView != imageviewArrayList.get(slotNumber)) imageView.clearAnimation();
-                                                        }
-                                                        //TODO Diese Animation kann später über die Instanz wieder beendet werden
-                                                        //TODO Läuft mir damit nicht die statusChangeListenerArrayList über?
-                                                        /**
-                                                         hmiModule.setStatusChangeListener(new StatusChangeListener() {
-                                                        @Override public void onChange() {
-                                                        slotMarker.clearAnimation();
-                                                        }
+                                                        //slotMarker.startAnimation(animation);
+
+                                                        final Handler h = new Handler();
+                                                        Runnable r = new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                slotMarker.startAnimation(animation);
+                                                                for(ImageView imageView : imageviewArrayList){
+                                                                    if(imageView != imageviewArrayList.get(slotNumber)) imageView.clearAnimation();
+                                                                }
+                                                            }
+                                                        };
+                                                        h.postDelayed(r, 1000);
+                                                        mHandler = new Handler(){
+                                                            @Override
+                                                            public void handleMessage(Message msg) {
+                                                                int msgId = msg.what;
+                                                                //Log.d("HANDLER","GOT msg : " + msgId);
+                                                                slotMarker.clearAnimation();
+                                                            }
+                                                        };
+
+                                                        //TODO hier muss ein Handler rein, der die Animation wieder beendet.
+/**
+                                                        hmiModule.setStatusChangeListener(new StatusChangeListener() {
+                                                            @Override public void onChange() {
+                                                                slotMarker.clearAnimation();
+                                                            }
                                                         });
-                                                         */
+
+
+                                                        final Handler h = new Handler();
+                                                        Runnable r = new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                for(ImageView imageView : imageviewArrayList){
+                                                                    if(imageView != imageviewArrayList.get(slotNumber)) imageView.clearAnimation();
+                                                                }
+                                                            }
+                                                        };
+                                                        h.postDelayed(r, 1000);
+
+*/
+
+
                                                     }
                                                 }
                                         );

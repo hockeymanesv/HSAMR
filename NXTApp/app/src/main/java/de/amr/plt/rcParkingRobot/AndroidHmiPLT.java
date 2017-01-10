@@ -152,12 +152,12 @@ public class AndroidHmiPLT implements IAndroidHmi {
 	 *
 	 * @autoh paulfoerster
 	 * @param statusChangeListener
-
+*/
 	//TODO muss man so einen Listener auch wieder löschen können?
 	public void setStatusChangeListener(StatusChangeListener statusChangeListener){
 		statusChangeListenerArrayList.add(statusChangeListener);
 	}
-	 */
+
 
 	public void setMode(Mode mode) {
 		bTCommunicationThread.sendMode(mode);

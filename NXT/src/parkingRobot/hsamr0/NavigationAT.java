@@ -175,7 +175,7 @@ public class NavigationAT implements INavigation {
 	double ParkingSlotError = 0;
 	int measurementQuality = 0;
 	ParkingSlotStatus ParkingSlotStatus;
-	boolean testParking = true;
+	boolean testParking = false;
 	
 	/**
 	 * map array of line references, whose corresponding lines form a closed

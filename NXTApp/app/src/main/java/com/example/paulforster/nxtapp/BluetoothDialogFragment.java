@@ -115,10 +115,12 @@ public class BluetoothDialogFragment extends DialogFragment {
 
         //wait till connection really is established and
         //TODO hier ein WarteDialog... das wäre cool
+        /**
         int i = 0;
         while (!hmiModule.isConnected()&& i<100000000/2) {
             i++;
         }
+         */
         //TODO hier könnte man den StatusChangeListener platzieren
 
     }
