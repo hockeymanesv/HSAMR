@@ -112,6 +112,7 @@ public class AndroidHmiPLT implements IAndroidHmi {
 			connectThread.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			Log.e("VERBINDUNGSKRAM","IOException: "+e.getMessage());
 		}
 		finally{
 			dataIn = null;
@@ -213,13 +214,15 @@ public class AndroidHmiPLT implements IAndroidHmi {
 		 * @param id ID number of the specific parking slot
 		 * @return the parking slot matching this ID, or null.
 		 */
+		//TODO hier passiert der Fehler
 		public ParkingSlot getParkingSlot(int id) {
+			/**
 			for (ParkingSlot p : parkingSlots) {
-				if (p.getID() == id) {
-					return p;
-				}
+				if (p.getID() == id) return p;
 			}
-			return null;
+			 */
+			return parkingSlots.get(id);
+			//return null;
 		}
 
 		@Override

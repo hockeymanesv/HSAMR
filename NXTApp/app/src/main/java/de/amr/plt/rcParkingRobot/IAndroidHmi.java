@@ -3,6 +3,8 @@ package de.amr.plt.rcParkingRobot;
 import parkingRobot.INxtHmi.Mode;
 import parkingRobot.hsamr0.GuidanceAT.CurrentStatus;
 import android.graphics.PointF;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Human Machine Interface module for communication with NXT robot. The device implementing this interface is acting as the client, the robot HMI module is 
@@ -173,7 +175,7 @@ public interface IAndroidHmi {
 	 * 
 	 * @author PLT
 	 */
-	public class ParkingSlot {		
+	public class ParkingSlot implements Parcelable{
 		// members
 		
 		/**
@@ -238,62 +240,102 @@ public interface IAndroidHmi {
 			this.frontBoundaryPosition	= frontBoundaryPosition;
 			this.status 				= slotStatus;		
 		}
-		
-		// Set methods
-		
-		/**
-		 * @param ID stores the parking slot ID that is the number of recent detected parking spaces incremented by one
-		 */
-		public void setID(int ID){
-			this.ID = ID;
-		}
-		/**
-		 * @param backBoundaryPosition position of parking slot back boundary, robot passes it first then the front boundary
-		 */
-		public void setBackBoundaryPosition(PointF backBoundaryPosition){
-			this.backBoundaryPosition  = backBoundaryPosition;
-		}
-		/**
-		 * @param frontBoundaryPosition position of parking slot front boundary, robot passes it second after the back boundary
-		 */
-		public void setFrontBoundaryPosition(PointF frontBoundaryPosition){
-			this.frontBoundaryPosition = frontBoundaryPosition;
-		}
-		/**
-		 * @param slotStatus characterization of the parking slot measurement
-		 */
-		public void setParkingSlotStatus(ParkingSlotStatus slotStatus){
-			this.status = slotStatus;
-		}
-		
-		
-		// Get methods
-		
-		/**
-		 * @return the parking slot ID that is the number of recent detected parking spaces incremented by one
-		 */
-		public int getID(){
-			return ID;
-		}
-		/**
-		 * @return backBoundaryPosition position of parking slot back boundary, robot passes it first then the front boundary
-		 */
-		public PointF getBackBoundaryPosition(){
-			return backBoundaryPosition;
-		}
-		/**
-		 * @return frontBoundaryPosition position of parking slot front boundary, robot passes it second after the back boundary
-		 */
-		public PointF getFrontBoundaryPosition(){
-			return frontBoundaryPosition;
-		}
-		/**
-		 * @return slotStatus characterization of the parking slot measurement
-		 */
-		public ParkingSlotStatus getParkingSlotStatus(){
-			return status;
-		}
-	}	
 
-	
+
+		// Parceable Stuff
+
+
+		private ParkingSlot(Parcel in) {
+			ID = in.readInt();
+			backBoundaryPosition.x = in.readFloat();
+			backBoundaryPosition.y = in.readFloat();
+			frontBoundaryPosition.x = in.readFloat();
+			frontBoundaryPosition.y = in.readFloat();
+			status = ParkingSlotStatus.valueOf(in.readString());
+		}
+
+		public int describeContents() {
+			return 0;
+		}
+
+		public void writeToParcel(Parcel out, int flags){
+			out.writeInt(ID);
+			out.writeFloat(backBoundaryPosition.x);
+			out.writeFloat(backBoundaryPosition.y);
+			out.writeFloat(frontBoundaryPosition.x);
+			out.writeFloat(frontBoundaryPosition.y);
+			out.writeString(status.name());
+		}
+
+		public static final Parcelable.Creator<ParkingSlot> CREATOR = new Parcelable.Creator<ParkingSlot>() {
+			public ParkingSlot createFromParcel(Parcel in) {
+				return new ParkingSlot(in);
+			}
+
+			public ParkingSlot[] newArray(int size) {
+				return new ParkingSlot[size];
+			}
+		};
+
+			// Set methods
+
+			/**
+			 * @param ID stores the parking slot ID that is the number of recent detected parking spaces incremented by one
+			 */
+			public void setID(int ID) {
+				this.ID = ID;
+			}
+
+			/**
+			 * @param backBoundaryPosition position of parking slot back boundary, robot passes it first then the front boundary
+			 */
+			public void setBackBoundaryPosition(PointF backBoundaryPosition) {
+				this.backBoundaryPosition = backBoundaryPosition;
+			}
+
+			/**
+			 * @param frontBoundaryPosition position of parking slot front boundary, robot passes it second after the back boundary
+			 */
+			public void setFrontBoundaryPosition(PointF frontBoundaryPosition) {
+				this.frontBoundaryPosition = frontBoundaryPosition;
+			}
+
+			/**
+			 * @param slotStatus characterization of the parking slot measurement
+			 */
+			public void setParkingSlotStatus(ParkingSlotStatus slotStatus) {
+				this.status = slotStatus;
+			}
+
+
+			// Get methods
+
+			/**
+			 * @return the parking slot ID that is the number of recent detected parking spaces incremented by one
+			 */
+			public int getID() {
+				return ID;
+			}
+
+			/**
+			 * @return backBoundaryPosition position of parking slot back boundary, robot passes it first then the front boundary
+			 */
+			public PointF getBackBoundaryPosition() {
+				return backBoundaryPosition;
+			}
+
+			/**
+			 * @return frontBoundaryPosition position of parking slot front boundary, robot passes it second after the back boundary
+			 */
+			public PointF getFrontBoundaryPosition() {
+				return frontBoundaryPosition;
+			}
+
+			/**
+			 * @return slotStatus characterization of the parking slot measurement
+			 */
+			public ParkingSlotStatus getParkingSlotStatus() {
+				return status;
+			}
+		}
 }

@@ -459,7 +459,7 @@ public class NavigationAT implements INavigation {
 			 angleResult = angleResult -Math.PI*2;
 		 }
 		
-		 angleMouse = this.mouseOdoMeasurement.getUSum()/MOUSE_SENSOR_OFFSET; //Einheiten überlegen
+		 angleMouse = this.mouseOdoMeasurement.getUSum()/MOUSE_SENSOR_OFFSET; //Einheiten ï¿½berlegen
 		 xMouse = Math.cos(this.mouseOdoMeasurement.getVSum()) / 1000;
 		 yMouse = Math.sin(this.mouseOdoMeasurement.getVSum()) / 1000;
 		 
@@ -805,8 +805,11 @@ public class NavigationAT implements INavigation {
 				frontBoundaryPositionY = (frontFrontBoundaryY + backFrontBoundaryY)/2;
 				backFrontError = errorX + errorY +errorAngle;
 				ParkingSlotError = (frontFrontError + backFrontError + frontBackError + backBackError) / 4;
-				
-				
+
+				//FOERSTER
+				measurementQuality = (int) (((ParkingSlotError*20)+1)%1);
+/**
+
 				if(ParkingSlotError < 0.05){
 					measurementQuality = 1;
 				}else if(ParkingSlotError < 0.10){
@@ -828,7 +831,7 @@ public class NavigationAT implements INavigation {
 				}else{
 					measurementQuality = 10;
 				}
-				
+	*/
 				if((Math.abs(frontBoundaryPositionX - backBoundaryPositionX) > 45 || Math.abs(frontBoundaryPositionY - backBoundaryPositionY) > 45) && measurementQuality < 5){
 					ParkingSlotStatus = ParkingSlotStatus.SUITABLE_FOR_PARKING;
 				}else{

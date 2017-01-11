@@ -24,31 +24,18 @@ public class ParkFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.park_fragment, container, false);
-        refreshTimer = new Timer();
-        refreshTimerTask = new TimerTask() {
-            @Override
-            public void run() {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshDistance();
-                    }
-                });
-            }
-        };
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        refreshTimer.schedule(refreshTimerTask,0,100);
+        reScheduleTimer(100);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        refreshTimerTask.cancel();
         refreshTimer.cancel();
     }
 
@@ -56,6 +43,24 @@ public class ParkFragment extends Fragment {
     public void onStop() {
         super.onStop();
         refreshTimer.purge();
+    }
+
+    public void reScheduleTimer(int duration) {
+        refreshTimer = new Timer("alertTimer",true);
+        refreshTimerTask = new MyTimerTask();
+        refreshTimer.schedule(refreshTimerTask, 0, duration);
+    }
+
+    private class MyTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshDistance();
+                }
+            });
+        }
     }
 
     public void refreshDistance(){
