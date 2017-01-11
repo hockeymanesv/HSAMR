@@ -76,6 +76,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         getSupportFragmentManager().enableDebugLogging(true);
+        btDialog = new BluetoothDialogFragment();
+        MapFragment mapFragment = new MapFragment();
+        ParkFragment parkFragment = new ParkFragment();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(R.id.content, mapFragment, "MAPFRAGMENT");
+        ft.add(R.id.content, parkFragment, "PARKFRAGMENT");
+        ft.hide(parkFragment);
+        ft.commit();
+        /**
         if (savedInstanceState == null) {
             btDialog = new BluetoothDialogFragment();
             MapFragment mapFragment = new MapFragment();
@@ -90,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT");
             ParkFragment parkFragment = (ParkFragment) getSupportFragmentManager().findFragmentByTag("PARKFRAGMENT");
         }
+         */
 }
 
     @Override

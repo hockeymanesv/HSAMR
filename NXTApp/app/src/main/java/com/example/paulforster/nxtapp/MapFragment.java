@@ -51,8 +51,8 @@ public class MapFragment extends Fragment {
     //Parkingslot-Kram
     private int noStoredSlots = 0;
     private int noSlots = 0;
-    ArrayList<IAndroidHmi.ParkingSlot> parkingslotArrayList;
-    ArrayList<ImageView> imageviewArrayList;
+    ArrayList<IAndroidHmi.ParkingSlot> parkingslotArrayList = new ArrayList<>();
+    ArrayList<ImageView> imageviewArrayList = new ArrayList<>();
 
     Handler mHandler = null;
 
@@ -60,6 +60,7 @@ public class MapFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.map_fragment, container, false);
+        /**
         if (savedInstanceState != null) {
             // Restore last state
             parkingslotArrayList = savedInstanceState.getParcelableArrayList("parkingslotArrayList");
@@ -67,6 +68,7 @@ public class MapFragment extends Fragment {
         } else {
             parkingslotArrayList = new ArrayList<>();
         }
+         */
         tileView = new TileView(this.getActivity());
         tileView.setSize(1024, 512);
         tileView.defineBounds(-30,90,210,-30);
