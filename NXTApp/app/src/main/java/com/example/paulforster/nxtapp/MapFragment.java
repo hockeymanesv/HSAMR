@@ -250,15 +250,14 @@ public class MapFragment extends Fragment {
                                         else{
                                             slotMarker.setAlpha(0.5f);
                                         }
-                                        /**
+
                                         tileView.addMarker(slotMarker,
                                                 ((hmiModule.getParkingSlot(i).getFrontBoundaryPosition().x
                                                         + hmiModule.getParkingSlot(i).getBackBoundaryPosition().x) / 2),
                                                 ((hmiModule.getParkingSlot(i).getBackBoundaryPosition().y
                                                         - hmiModule.getParkingSlot(i).getFrontBoundaryPosition().y) / 2),
                                                 -0.5f, -0.5f);
-                                         */
-                                        addMarker(hmiModule.getParkingSlot(i), slotMarker);
+
                                         Log.e("testtest", " slotID: " + Integer.toString(slotID) + " i: " + Integer.toString(i) + " noSlots: " + Integer.toString(noSlots) + " nostored: " + Integer.toString(noStoredSlots));
                                         imageviewArrayList.add(slotID, slotMarker);
                                     }
