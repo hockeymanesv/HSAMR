@@ -5,14 +5,24 @@
         android:id="@+id/map_fragment"
         android:orientation="vertical" >-->
 
-        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_weight="1"
             android:id="@+id/map_main"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
-
-
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/map">
         </RelativeLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/rand"
+            android:scaleType="fitXY"/>
+
+        </FrameLayout>
 
 

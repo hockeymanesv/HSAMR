@@ -34,6 +34,7 @@ import parkingRobot.hsamr0.GuidanceAT;
 import parkingRobot.hsamr0.HmiPLT;
 
 import static com.example.paulforster.nxtapp.MainActivity.hmiModule;
+import static java.lang.Math.abs;
 
 /**
  * Created by paulforster on 27.11.16.
@@ -43,7 +44,7 @@ public class MapFragment extends Fragment {
 
     Timer refreshTimer;
     TimerTask refreshTimerTask;
-    private TileView tileView = null;
+    static TileView tileView = null;
     private ImageView robot = null;
     private Paint linePaint = null;
     private CircularArrayList roboPath = null;
@@ -70,15 +71,18 @@ public class MapFragment extends Fragment {
         }
          */
         tileView = new TileView(this.getActivity());
-        tileView.setSize(1024, 512);
-        tileView.defineBounds(-30,90,210,-30);
+        tileView.setSize(3072, 1654);
+        tileView.defineBounds(-40,100,220,-40);
         tileView.addDetailLevel(1f,"robomap/tile-%d_%d.png");
+        tileView.setScale(0.34f);
         robot = new ImageView(this.getActivity());
         robot.setImageResource(R.drawable.robo);
         tileView.addMarker(robot, 0, 0, -0.5f, -0.5f);
+        tileView.moveToMarker(robot, true);
+
         robot.setRotation(-90);
         //muss wahrscheinlich so, da die ID erst zur Laufzeit festgelegt wird
-        ((RelativeLayout)view.findViewById(R.id.map_main)).addView(tileView);
+        ((RelativeLayout)view.findViewById(R.id.map)).addView(tileView);
         roboPath = new CircularArrayList(250);
         linePaint = tileView.getDefaultPathPaint();
         linePaint.setColor(getResources().getColor(R.color.colorPrimaryDark));
@@ -103,7 +107,6 @@ public class MapFragment extends Fragment {
 
 
     }
-
 
     @Override
     public void onResume() {
@@ -147,12 +150,38 @@ public class MapFragment extends Fragment {
         }
     }
 
+    private void addMarker(IAndroidHmi.ParkingSlot slot, ImageView view){
+        float xa = slot.getFrontBoundaryPosition().x;
+        float xe = slot.getBackBoundaryPosition().x;
+        float ya = slot.getFrontBoundaryPosition().y;
+        float ye = slot.getBackBoundaryPosition().y;
+        Log.e("Luecke", " ID:" + Integer.toString(slot.getID()));
+        if(abs(xa-xe)<3){
+            tileView.addMarker(view,(xa+xe/2),(ye-ya/2),+1f,-0.5f);
+            Log.e("Luecke", " Linie 2 ### Anfang:" + Float.toString(xa) + " , " + Float.toString(ya) + " Ende:" + Float.toString(xe) + " , " + Float.toString(ye));
+        }else if (xa-xe>=3){
+            tileView.addMarker(view,(xa+xe/2),(ye-ya/2),-0.5f,-1.5f);
+            Log.e("Luecke", " Linie 3 ### Anfang:" + Float.toString(xa) + " , " + Float.toString(ya) + " Ende:" + Float.toString(xe) + " , " + Float.toString(ye));
+
+        }else if(xa-xe<=-3){
+            tileView.addMarker(view,(xa+xe/2),(ye-ya/2),-0.5f,+0.5f);
+            Log.e("Luecke", " Linie 1 ### Anfang:" + Float.toString(xa) + " , " + Float.toString(ya) + " Ende:" + Float.toString(xe) + " , " + Float.toString(ye));
+
+        }else{
+            tileView.addMarker(view,(xa+xe/2),(ye-ya/2),-0.5f,-0.5f);
+            Log.e("Luecke", " XXXX ### Anfang:" + Float.toString(xa) + " Ende:" + Float.toString(xe));
+
+        }
+
+    }
+
     public void refreshMap(){
                         if (hmiModule != null) if(hmiModule.isConnected()) {
                             //###########RobotPosition##############################################
                             tileView.moveMarker(robot, hmiModule.getPosition().getX(),
                                     hmiModule.getPosition().getY());
                             robot.setRotation(-hmiModule.getPosition().getAngle() - 90);
+                            Log.e("Winkel", Float.toString(hmiModule.getPosition().getAngle()));
 
                             //###########RobotPath##################################################
                             //new RefreshPathTask().execute();
@@ -168,6 +197,7 @@ public class MapFragment extends Fragment {
                             noSlots = hmiModule.getNoOfParkingSlots();
                             //TODO noStoredSlots speichern?
                             if (noSlots > noStoredSlots) {
+                                Log.e("Luecke", "Arraygröße ist " + Integer.toString(noSlots));
                                 for (int i = noStoredSlots; i < noSlots; i++) {
                                     final int slotID = hmiModule.getParkingSlot(i).getID();
                                     //Wenn Parklücke unbekannt
@@ -220,12 +250,16 @@ public class MapFragment extends Fragment {
                                         else{
                                             slotMarker.setAlpha(0.5f);
                                         }
+                                        /**
                                         tileView.addMarker(slotMarker,
                                                 ((hmiModule.getParkingSlot(i).getFrontBoundaryPosition().x
                                                         + hmiModule.getParkingSlot(i).getBackBoundaryPosition().x) / 2),
                                                 ((hmiModule.getParkingSlot(i).getBackBoundaryPosition().y
                                                         - hmiModule.getParkingSlot(i).getFrontBoundaryPosition().y) / 2),
                                                 -0.5f, -0.5f);
+                                         */
+                                        addMarker(hmiModule.getParkingSlot(i), slotMarker);
+                                        Log.e("testtest", " slotID: " + Integer.toString(slotID) + " i: " + Integer.toString(i) + " noSlots: " + Integer.toString(noSlots) + " nostored: " + Integer.toString(noStoredSlots));
                                         imageviewArrayList.add(slotID, slotMarker);
                                     }
                                     //Wenn Parklücke bereits bekannt
@@ -276,11 +310,14 @@ public class MapFragment extends Fragment {
                                             }
                                         }
                                         parkingslotArrayList.add(slotID, hmiModule.getParkingSlot(i));
+                                        Log.e("Luecke", "ID " + Integer.toString(slotID) + " aktualisiert");
+
                                         tileView.moveMarker(slotMarker,
                                                 ((hmiModule.getParkingSlot(i).getFrontBoundaryPosition().x
                                                         + hmiModule.getParkingSlot(i).getBackBoundaryPosition().x) / 2),
                                                 ((hmiModule.getParkingSlot(i).getBackBoundaryPosition().y
                                                         - hmiModule.getParkingSlot(i).getFrontBoundaryPosition().y) / 2));
+
                                     }
 
 /**

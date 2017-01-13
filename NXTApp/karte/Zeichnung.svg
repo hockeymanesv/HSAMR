@@ -9,15 +9,15 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="240cm"
-   height="120cm"
-   viewBox="0 0 240 120"
+   width="260cm"
+   height="140cm"
+   viewBox="0 0 260 140"
    id="svg3336"
    version="1.1"
    inkscape:version="0.91 r13725"
-   inkscape:export-filename="/Users/paulforster/Documents/code/HSAMR/NXTAPP/karte/karte_final.png"
-   inkscape:export-xdpi="10.837334"
-   inkscape:export-ydpi="10.837334"
+   inkscape:export-filename="/Users/paulforster/Documents/code/HSAMR/NXTAPP/karte/karte_final2.png"
+   inkscape:export-xdpi="15.005538"
+   inkscape:export-ydpi="15.005538"
    sodipodi:docname="Zeichnung.svg">
   <defs
      id="defs3338" />
@@ -28,9 +28,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.079307804"
-     inkscape:cx="1400.6565"
-     inkscape:cy="1213.3122"
+     inkscape:zoom="0.51"
+     inkscape:cx="3538.5693"
+     inkscape:cy="3879.9673"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -59,8 +59,8 @@
     <rect
        style="fill:#fafafa;fill-opacity:1;stroke:none;stroke-width:14.99999619;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.33242876"
        id="rect5588"
-       width="240"
-       height="120"
+       width="260"
+       height="140"
        x="0"
        y="0"
        inkscape:export-filename="/Users/paulforster/Documents/code/HSAMR/NXTAPP/karte/rect5588.png"
@@ -69,14 +69,86 @@
     <path
        inkscape:connector-curvature="0"
        id="path4152"
-       d="m 30,30 0,60 180,0 0,-60 -30,0 0,30 -120,0 0,-30 z"
+       d="m 40,40 0,60 180,0 0,-60 -30,0 0,30 -120,0 0,-30 z"
        style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#bdbdbd;stroke-width:15;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1"
        inkscape:export-filename="/Users/paulforster/Documents/code/HSAMR/NXTAPP/karte/path4152.png"
        inkscape:export-xdpi="10"
        inkscape:export-ydpi="10" />
+    <rect
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:106.2990036;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4174"
+       width="38.050728"
+       height="22.616497"
+       x="16.992161"
+       y="120.05243"
+       ry="0" />
+    <rect
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:106.2990036;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4160"
+       width="54.763729"
+       height="19.912241"
+       x="205.12148"
+       y="120.02109" />
+    <rect
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:106.2990036;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4162"
+       width="19.73481"
+       height="20.606375"
+       x="240.17419"
+       y="99.990837" />
+    <rect
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:106.2990036;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4164"
+       width="20.876484"
+       height="40.849815"
+       x="240.08299"
+       y="-0.91137499" />
+    <rect
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:106.2990036;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4166"
+       width="75.01947"
+       height="20.569868"
+       x="168.99911"
+       y="-0.57378179" />
+    <rect
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:106.2990036;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4168"
+       width="79.994164"
+       height="38.699425"
+       x="90.012169"
+       y="-4.8337221" />
+    <rect
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:106.2990036;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4170"
+       width="97.593719"
+       height="23.092823"
+       x="-4.1813178"
+       y="-3.1434026" />
+    <rect
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:106.2990036;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4172"
+       width="26.619886"
+       height="123.74921"
+       x="-6.6723146"
+       y="17.318363" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#424242;stroke-width:2.9999943;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="m 30,30 0,60 180,0 0,-60 -30,0 0,30 -120,0 0,-30 z"
+       style="fill:none;fill-rule:evenodd;stroke:#eeeeee;stroke-width:0.99999799;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 205,140 0,-20 35,0 0,-20 20,0"
+       id="path4158"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path4156"
+       d="m 170,55 0,-35 70,0 0,20 20,0"
+       style="fill:none;fill-rule:evenodd;stroke:#eeeeee;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#eeeeee;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 55,140 0,-20 -35,0 0,-100 70,0 0,35"
+       id="path4138"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#424242;stroke-width:2.99999428;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 40,40 0,60 180,0 0,-60 -30,0 0,30 -120,0 0,-30 z"
        id="path4150"
        inkscape:connector-curvature="0" />
   </g>

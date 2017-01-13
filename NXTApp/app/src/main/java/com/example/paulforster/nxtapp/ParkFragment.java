@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,46 +64,42 @@ public class ParkFragment extends Fragment {
         }
     }
 
+    private float calculateAlpha (double distance, int step){
+        float alpha = (float)((distance -300) * 2.1 / (50-300));
+        if (alpha < step*0.7f) return 0;
+        else return alpha-(step*0.7f);
+    }
+
     public void refreshDistance(){
                             if (hmiModule != null) {
                                 if (hmiModule.isConnected()) {
-                                    double visualDistance;
-                                    visualDistance = (hmiModule.getPosition().getDistanceFront()
-                                            - 300) * (3 - 0) / (50 - 300) + 0;
-
                                     getView().findViewById(R.id.abstand_oben3)
-                                            .setAlpha((float) visualDistance);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceFront(), 0));
                                     getView().findViewById(R.id.abstand_oben2)
-                                            .setAlpha((float) visualDistance - 1);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceFront(), 1));
                                     getView().findViewById(R.id.abstand_oben1)
-                                            .setAlpha((float) visualDistance - 2);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceFront(), 2));
 
-                                    visualDistance = (hmiModule.getPosition().getDistanceFrontSide()
-                                            - 300) * (3 - 0) / (50 - 300) + 0;
                                     getView().findViewById(R.id.abstand_seiteoben3)
-                                            .setAlpha((float) visualDistance);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceFrontSide(), 0));
                                     getView().findViewById(R.id.abstand_seiteoben2)
-                                            .setAlpha((float) visualDistance - 1);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceFrontSide(), 1));
                                     getView().findViewById(R.id.abstand_seiteoben1)
-                                            .setAlpha((float) visualDistance - 2);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceFrontSide(), 2));
 
-                                    visualDistance = (hmiModule.getPosition().getDistanceBackSide()
-                                            - 300) * (3 - 0) / (50 - 300) + 0;
                                     getView().findViewById(R.id.abstand_seiteunten3)
-                                            .setAlpha((float) visualDistance);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceBackSide(), 0));
                                     getView().findViewById(R.id.abstand_seiteunten2)
-                                            .setAlpha((float) visualDistance - 1);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceBackSide(), 1));
                                     getView().findViewById(R.id.abstand_seiteunten1)
-                                            .setAlpha((float) visualDistance - 2);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceBackSide(), 2));
 
-                                    visualDistance = (hmiModule.getPosition().getDistanceBack()
-                                            - 300) * (3 - 0) / (50 - 300) + 0;
                                     getView().findViewById(R.id.abstand_unten3)
-                                            .setAlpha((float) visualDistance);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceBack(), 0));
                                     getView().findViewById(R.id.abstand_unten2)
-                                            .setAlpha((float) visualDistance - 1);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceBack(), 1));
                                     getView().findViewById(R.id.abstand_unten1)
-                                            .setAlpha((float) visualDistance - 2);
+                                            .setAlpha(0.3f + calculateAlpha(hmiModule.getPosition().getDistanceBack(), 2));
                                 }
                             }
                         }

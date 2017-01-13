@@ -24,6 +24,8 @@ import java.util.TimerTask;
 import de.amr.plt.rcParkingRobot.AndroidHmiPLT;
 import parkingRobot.INxtHmi;
 
+import static com.example.paulforster.nxtapp.MapFragment.tileView;
+
 //TODO einzeichnen von Fremnden Gegenständen in die Karte
 //TODO warum kann ich da nicht parken?
 //TODO ParkIcons neben die Linie
@@ -196,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
                                         bottomNavigationView.getMenu().getItem(0).setEnabled(true);
                                         bottomNavigationView.getMenu().getItem(1).setEnabled(true);
                                         bottomNavigationView.getMenu().getItem(2).setEnabled(true);
+                                        tileView.slideToAndCenter(hmiModule.getPosition().getX(), hmiModule.getPosition().getY());
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(true);
                                         }
@@ -223,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
                                         bottomNavigationView.getMenu().getItem(0).setEnabled(true);
                                         bottomNavigationView.getMenu().getItem(1).setEnabled(true);
                                         bottomNavigationView.getMenu().getItem(2).setEnabled(true);
+                                        tileView.slideToAndCenter(hmiModule.getPosition().getX(), hmiModule.getPosition().getY());
                                         for(ImageView imageView : ((MapFragment)getSupportFragmentManager().findFragmentByTag("MAPFRAGMENT")).imageviewArrayList){
                                             imageView.setClickable(true);
                                         }
