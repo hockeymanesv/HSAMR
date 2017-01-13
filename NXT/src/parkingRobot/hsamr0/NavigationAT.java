@@ -183,7 +183,7 @@ public class NavigationAT implements INavigation {
 	double ParkingSlotError = 0;
 	int measurementQuality = 0;
 	ParkingSlotStatus ParkingSlotStatus;
-	boolean testParking = true;
+	boolean testParking = false;
 	
 	/**
 	 * map array of line references, whose corresponding lines form a closed
@@ -770,7 +770,8 @@ public class NavigationAT implements INavigation {
 			ParkingSlots.add(new ParkingSlot(2, new Point(180,15), new Point(180,60), ParkingSlotStatus.SUITABLE_FOR_PARKING, 0, 1));
 			testParking= false;
 		}
-		if(line == 0 || line == 1){
+		if(false){
+//		if(line == 0 || line == 1){
 //		if(this.pose.getY() < 0.10 || this.pose.getX() > 1.70 || (Math.abs(this.pose.getX() - 0.90) < 0.30) && (Math.abs(this.pose.getY() - 0.45) < 0.05)){
 			float poseX= this.pose.getX() * 100;
 			float poseY= this.pose.getY() * 100;
@@ -884,22 +885,15 @@ public class NavigationAT implements INavigation {
 			
 		}
 		
-	if(false){	
-//	if(line == 0 || line == 1){
-//	if(this.pose.getY() < 0.10 || this.pose.getX() > 1.70 || (Math.abs(this.pose.getX() - 0.90) < 0.30) && (Math.abs(this.pose.getY() - 0.45) < 0.05)){
+	if(this.pose.getY() < 0.10 || this.pose.getX() > 1.70){	
 		float poseX= this.pose.getX() * 100;
 		float poseY= this.pose.getY() * 100;
-//		if(this.frontSideSensorDistance > 200  && !possibleParkingSlot){
-//			frontBackBoundaryX = poseX;
-//			frontBackBoundaryY = poseY;
-//			frontBackBoundaryX += xFrontBouandaryOffset();
-//			frontBackBoundaryY += yFrontBouandaryOffset();
-//			//Sound.twoBeeps();
-//			possibleParkingSlot = true;
-//			frontBackError = errorX + errorY +errorAngle;
-//		}
+		if(this.frontSideSensorDistance > 200  && !possibleParkingSlot){
+			//Sound.twoBeeps();
+			possibleParkingSlot = true;
+		}
 		
-		if(this.backSideSensorDistance > 200 && !finishBack){
+		if(this.backSideSensorDistance > 200 && possibleParkingSlot && !finishBack){
 			
 			backBackBoundaryX = poseX;
 			backBackBoundaryY = poseY;
@@ -911,19 +905,20 @@ public class NavigationAT implements INavigation {
 			backBackError = errorX + errorY +errorAngle;
 		}
 		
-		if(this.frontSideSensorDistance < 150 && finishBack){
+		if(this.frontSideSensorDistance < 150 && possibleParkingSlot){
 			frontFrontBoundaryX = poseX;
 			frontFrontBoundaryY = poseY;
 			frontFrontBoundaryX += xFrontBouandaryOffset();
 			frontFrontBoundaryY += yFrontBouandaryOffset();
-//			possibleParkingSlot = false;
-//			frontSensorFinished = true;
+			possibleParkingSlot = false;
+			frontSensorFinished = true;
 			frontFrontError = errorX + errorY +errorAngle;
-			
+		}
+		
+		if(this.backSideSensorDistance < 150 && finishBack && frontSensorFinished && !possibleParkingSlot){
 			finishBack = false;
 			frontBoundaryPositionX = frontFrontBoundaryX;
 			frontBoundaryPositionY = frontFrontBoundaryY;
-			backFrontError = errorX + errorY +errorAngle;
 			ParkingSlotError = (frontFrontError + backBackError) / 2;
 			
 			
@@ -960,51 +955,6 @@ public class NavigationAT implements INavigation {
 			
 		}
 		
-//		if(this.backSideSensorDistance < 150 && finishBack && frontSensorFinished && !possibleParkingSlot){
-//			backFrontBoundaryX = poseX;
-//			backFrontBoundaryY = poseY;
-//			backFrontBoundaryX += xBackBouandaryOffset();
-//			backFrontBoundaryY += yBackBouandaryOffset();
-//			finishBack = false;
-//			frontBoundaryPositionX = (frontFrontBoundaryX + backFrontBoundaryX)/2;
-//			frontBoundaryPositionY = (frontFrontBoundaryY + backFrontBoundaryY)/2;
-//			backFrontError = errorX + errorY +errorAngle;
-//			ParkingSlotError = (frontFrontError + backFrontError + frontBackError + backBackError) / 4;
-//			
-//			
-//			if(ParkingSlotError < 0.05){
-//				measurementQuality = 1;
-//			}else if(ParkingSlotError < 0.10){
-//				measurementQuality = 2;
-//			}else if(ParkingSlotError < 0.15){
-//				measurementQuality = 3;
-//			}else if(ParkingSlotError < 0.20){
-//				measurementQuality = 4;
-//			}else if(ParkingSlotError < 0.25){
-//				measurementQuality = 5;
-//			}else if(ParkingSlotError < 0.30){
-//				measurementQuality = 6;
-//			}else if(ParkingSlotError < 0.35){
-//				measurementQuality = 7;
-//			}else if(ParkingSlotError < 0.40){
-//				measurementQuality = 8;
-//			}else if(ParkingSlotError < 0.45){
-//				measurementQuality = 9;
-//			}else{
-//				measurementQuality = 10;
-//			}
-//			
-//			if((Math.abs(frontBoundaryPositionX - backBoundaryPositionX) > 45 || Math.abs(frontBoundaryPositionY - backBoundaryPositionY) > 45) && measurementQuality < 5){
-//				ParkingSlotStatus = ParkingSlotStatus.SUITABLE_FOR_PARKING;
-//			}else{
-//				ParkingSlotStatus = ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING;
-//			}
-//			newSlot = true;
-//			i=0;
-//			
-//			
-//		}
-		
 		if(newSlot){
 			if(existingParkingSlot){
 				if((Math.abs(ParkingSlots.get(i).getBackBoundaryPosition().getX() - backBoundaryPositionX) < 10 && Math.abs(ParkingSlots.get(i).getBackBoundaryPosition().getY() - backBoundaryPositionY) < 10) && ParkingSlots.get(i).getMeasurementQuality() < measurementQuality){
@@ -1016,7 +966,7 @@ public class NavigationAT implements INavigation {
 //					Sound.twoBeeps();
 				}
 				
-				if(newSlot && (i==(ParkingSlots.size() - 1) || i==0)){
+				if(newSlot && i==(ParkingSlots.size() - 1)){
 					//ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY), new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0));
 					ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point(backBoundaryPositionX,backBoundaryPositionY), new Point(frontBoundaryPositionX,frontBoundaryPositionY), ParkingSlotStatus, measurementQuality, line));
 //					Sound.beepSequenceUp();
@@ -1096,7 +1046,7 @@ public class NavigationAT implements INavigation {
 //						Sound.twoBeeps();
 					}
 					
-					if(newSlotBack && (i==(ParkingSlots.size() - 1) || i==0)){
+					if(newSlotBack && i==(ParkingSlots.size() - 1)){
 						//ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY), new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0));
 						ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point(backBoundaryPositionXBack,backBoundaryPositionY), new Point(frontBoundaryPositionXBack,frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0, line));
 //						Sound.twoBeeps();
@@ -1117,14 +1067,14 @@ public class NavigationAT implements INavigation {
 			
 			if(newSlotFront){
 				if(existingParkingSlot){
-					if(Math.abs(ParkingSlots.get(j).getBackBoundaryPosition().getX() - backBoundaryPositionXFront) < 5 && Math.abs(ParkingSlots.get(j).getBackBoundaryPosition().getY() - backBoundaryPositionY) < 5){
+					if(Math.abs(ParkingSlots.get(j).getBackBoundaryPosition().getX() - backBoundaryPositionXFront) < 10 && Math.abs(ParkingSlots.get(j).getBackBoundaryPosition().getY() - backBoundaryPositionY) < 10){
 						ParkingSlots.get(j).setBackBoundaryPosition(new Point((float)backBoundaryPositionXFront,(float)backBoundaryPositionY));
 						ParkingSlots.get(j).setFrontBoundaryPosition(new Point((float)frontBoundaryPositionXFront,(float)frontBoundaryPositionY));
 						newSlotFront = false;
 //						Sound.twoBeeps();
 					}
 					
-					if(newSlotFront && (j==(ParkingSlots.size() - 1) || j==0)){
+					if(newSlotFront && j==(ParkingSlots.size() - 1)){
 						//ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point((float)backBoundaryPositionX,(float)backBoundaryPositionY), new Point((float)frontBoundaryPositionX,(float)frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0));
 						ParkingSlots.add( new ParkingSlot(ParkingSlots.size(), new Point(backBoundaryPositionXFront,backBoundaryPositionY), new Point(frontBoundaryPositionXFront,frontBoundaryPositionY), ParkingSlotStatus.NOT_SUITABLE_FOR_PARKING, 0, line));
 //						Sound.beepSequenceUp();

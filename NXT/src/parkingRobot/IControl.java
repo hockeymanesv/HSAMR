@@ -46,12 +46,12 @@ public interface IControl {
 		/**
 		 * erstes Beispielprogramm abspielen
 		 */
-//		EXAMPLE_ONE,
+		EXAMPLE_ONE,
 		
 		/**
 		 * zweites Beispielprogramm abspielen
 		 */
-//		EXAMPLE_TWO
+		EXAMPLE_TWO
 	}
 	
 		
@@ -119,7 +119,6 @@ public interface IControl {
 	 * setzt, ob beim Einparken oder Ausparken
 	 * @param status
 	 */
-	public void setInOrOut(boolean status);
-
+	
 }
 
