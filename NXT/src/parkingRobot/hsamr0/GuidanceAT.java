@@ -10,6 +10,7 @@ import parkingRobot.IControl.*;
 import parkingRobot.INxtHmi;
 import parkingRobot.INavigation;
 import parkingRobot.INavigation.ParkingSlot;
+import parkingRobot.INavigation.ParkingSlot.ParkingSlotStatus;
 import parkingRobot.IPerception;
 import parkingRobot.IMonitor;
 import lejos.geom.Line;
@@ -78,6 +79,14 @@ public class GuidanceAT {
 	 * represents the actual line of the robot (as an int)
 	 */
 	static int currentLine_int = 0;
+	/**
+	 * represents the last line of the robot
+	 */
+	static Line lastLine = line0;
+	/**
+	 * represents the last line of the robot (as an int)
+	 */
+	static int lastLine_int = 0;
 
 
 	/////////////////////////////////////
@@ -335,8 +344,27 @@ public class GuidanceAT {
 	static double x3 = 0;					///////////test
 	static double x4 = 0;					///////////test
 	
+	static ParkingSlot park_now_known_Parking_Slot_to_park = null;	
+	static boolean park_now_founded_slot_to_smal = false;
+	static boolean park_now_found = false;
 	
 	
+	static boolean marker0 = false;
+	static boolean marker1 = false;
+	static boolean marker2 = false;
+	
+	static boolean marker3 = false;
+	/**
+	 * park_now_slot_in_corner_fail
+	 */
+	static Line park_now_known_back_boundery_line = null;
+	
+	
+	static double BB_X = 0;
+	static double BB_Y = 0;
+	static double FB_X = 0;
+	static double FB_Y = 0;
+
 	
 	/////////////
 	//MAIN METHOD
@@ -381,7 +409,7 @@ public class GuidanceAT {
 
 				// Into action
 				if (lastStatus != CurrentStatus.SCOUT) {
-					control.setCtrlMode(ControlMode.LINE_CTRL);
+					control.setCtrlMode(ControlMode.EXAMPLE_TWO);
 					navigation.setDetectionState(true);	
 				}
 
@@ -432,6 +460,13 @@ public class GuidanceAT {
 					park_this_selected_Parking_Slot = navigation.getParkingSlots()[park_this_selected_Parking_Slot_int];
 					park_this_selected_Parking_Slot_Line = map[park_this_selected_Parking_Slot.getLine()];
 					park_this_range_slotbeginning = (park_this_selected_Parking_Slot.getBackBoundaryPosition().getX() - 10);
+					
+					
+					BB_X = park_this_selected_Parking_Slot.getBackBoundaryPosition().getX();
+					BB_Y = park_this_selected_Parking_Slot.getBackBoundaryPosition().getY();
+					FB_X = park_this_selected_Parking_Slot.getFrontBoundaryPosition().getX();
+					FB_Y = park_this_selected_Parking_Slot.getFrontBoundaryPosition().getY();
+
 				}
 				
 				// While action
@@ -457,7 +492,7 @@ public class GuidanceAT {
 					if (park_this_selected_Parking_Slot_Line != currentLine){
 						park_this_into_correct_line = true;
 					}
-					if(/*park_this_into_correct_line && */park_this_selected_Parking_Slot_Line == currentLine){	///////////// normal muss das kommentar einkommentiert sein
+					if(park_this_into_correct_line && park_this_selected_Parking_Slot_Line == currentLine){
 						sm_park_this_currentStatus = SM_park_this.DRIVE_TO_SLOT_BEGINNING;
 					}
 					
@@ -511,7 +546,7 @@ public class GuidanceAT {
 					
 					park_out_slotrange = park_this_selected_Parkingslot_Slotrange;
 					
-					coefficients = coefficient_calculation(park_this_selected_Parkingslot_Slotrange, 32.0, 1);
+					coefficients = coefficient_calculation(park_this_selected_Parkingslot_Slotrange, 30.0, 1);
 					control.setCoefficients(coefficients);
 					
 					// State transition check
@@ -535,7 +570,11 @@ public class GuidanceAT {
 					
 					// Into action
 					if (sm_park_this_lastStatus != SM_park_this.PARKING_MANEUVER) {
+						
+						
 						robo_in_parking_movement = true;
+						
+						control.resetParkVariables();
 						control.setCtrlMode(ControlMode.PARK_CTRL);						
 					}
 					
@@ -611,21 +650,31 @@ public class GuidanceAT {
 				
 				// State transition check
 				lastStatus = currentStatus;
-				if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
+				if ((hmi.getMode() == parkingRobot.INxtHmi.Mode.SCOUT) && !robo_in_parking_movement) {				//SCOUT_MODUS
+					currentStatus = CurrentStatus.SCOUT;
+				} else if (Button.ENTER.isDown()) {
+					currentStatus = CurrentStatus.SCOUT;
+					while (Button.ENTER.isDown()) {
+						Thread.sleep(1);
+					} // wait for button release	
+				} else if ((hmi.getMode() == parkingRobot.INxtHmi.Mode.PARK_NOW) && !robo_in_parking_movement) {	//PARK_NOW_MODUS
+					currentStatus = CurrentStatus.PARK_NOW;	
+				}  else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) {
+					currentStatus = CurrentStatus.INACTIVE;
+				} else if (SM_park_this_finnished) {
+					currentStatus = CurrentStatus.PARKED;
+				} else if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
 					currentStatus = CurrentStatus.EXIT;								
 					while (Button.ESCAPE.isDown()) {
 						Thread.sleep(1);
 					}
 				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.DISCONNECT) {
 					currentStatus = CurrentStatus.EXIT;
-				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) {
-					currentStatus = CurrentStatus.INACTIVE;
-				} else if (SM_park_this_finnished) {
-					currentStatus = CurrentStatus.PARKED;
 				}
 				
 				// Leave action
 				if (currentStatus != CurrentStatus.PARK_THIS) {
+					sm_park_this_lastStatus = SM_park_this.CORRECT_PARKING_POSE;				//////////////////////////
 					SM_park_this_finnished = false;
 				}
 				break;
@@ -646,18 +695,38 @@ public class GuidanceAT {
 					if (sm_park_now_lastStatus != SM_park_now.LOOKING_FOR_SLOTS) {
 						control.setCtrlMode(ControlMode.LINE_CTRL);	
 					}
+					
 					// While action
+					{
+						
+					}
 					
 					// State transition check
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
-					if(currentLine_int == 0 || currentLine_int == 1 || currentLine_int == 4){
-						if ((perception.getFrontSideSensorDistance() > 300) && (perception.getBackSideSensorDistance() < 300)){
+					if((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() < 200)){
+						marker0 = true;						////////////////////
+						park_now_founded_slot_to_smal = false;
+					}
+					
+					if(!park_now_founded_slot_to_smal){
+						if((currentLine_int == 0 || currentLine_int == 1) && marker0){
+							if ((perception.getFrontSideSensorDistance() > 300) && (perception.getBackSideSensorDistance() < 200)){
+								sm_park_now_currentStatus = SM_park_now.IS_THE_SLOT_KNOWN;
+							}
+						}
+						
+						if(currentLine_int == 4 && perception.getFrontSideSensorDistance() < 150){
+							marker3 = true;
+						}
+						if (marker3 && perception.getFrontSideSensorDistance() > 150){
 							sm_park_now_currentStatus = SM_park_now.IS_THE_SLOT_KNOWN;
 						}
 					}
 					// Leave action	
 					if (sm_park_now_currentStatus != SM_park_now.LOOKING_FOR_SLOTS) {
+						marker3 = false;
+						marker0 = false;
 						control.setCtrlMode(ControlMode.INACTIVE);
 					}	
 					break;
@@ -676,18 +745,34 @@ public class GuidanceAT {
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
 					ParkingSlot slots[] = navigation.getParkingSlots();
+					
 					boolean slotFound = false;
 					
 					for(int i = 0;i < slots.length; i++){
-						if(Math.abs(slots[i].getBackBoundaryPosition().getX() - (navigation.getPose().getX())/100) < 10 && Math.abs(slots[i].getBackBoundaryPosition().getY() - (navigation.getPose().getY()/100)) < 10){
-			                slotFound = true;
-							break;
+						if(Math.abs(slots[i].getBackBoundaryPosition().getX() - (navigation.getPose().getX()) * 100) < 10 && Math.abs(slots[i].getBackBoundaryPosition().getY() - (navigation.getPose().getY() * 100)) < 10){
+			               
+							slotFound = true;
+							park_now_known_Parking_Slot_to_park = slots[i];
+	
+							if(park_now_known_Parking_Slot_to_park.getLine() % 2 == 0){
+								park_now_slot_width = Math.abs(park_now_known_Parking_Slot_to_park.getBackBoundaryPosition().getX() - park_now_known_Parking_Slot_to_park.getFrontBoundaryPosition().getX());
+							} else if (park_now_known_Parking_Slot_to_park.getLine() % 2 == 1){
+								park_now_slot_width = Math.abs(park_now_known_Parking_Slot_to_park.getBackBoundaryPosition().getY() - park_now_known_Parking_Slot_to_park.getFrontBoundaryPosition().getY());
+							}
+							
+			                break;
 			            }
 			        }
 					
-					if(slotFound){
+					if(park_now_slot_width < 40){
+						park_now_founded_slot_to_smal = true;
+					}
+					
+					if(slotFound && park_now_known_Parking_Slot_to_park.getStatus() == ParkingSlotStatus.SUITABLE_FOR_PARKING){
 						sm_park_now_currentStatus = SM_park_now.PATH_GENERATOR;
-					} else if (!slotFound){
+					} else if(slotFound && park_now_founded_slot_to_smal){
+						sm_park_now_currentStatus = SM_park_now.LOOKING_FOR_SLOTS;
+					} else if (!slotFound || (!park_now_founded_slot_to_smal && slotFound)){
 						sm_park_now_currentStatus = SM_park_now.MEASURE_SLOT;
 					}
 					
@@ -702,10 +787,14 @@ public class GuidanceAT {
 						control.setCtrlMode(ControlMode.LINE_CTRL);
 						navigation.setDetectionState(true);
 						
+						park_now_known_back_boundery_line = currentLine;
 						if(currentLine_int % 2 == 0){
 							park_now_back_boundery = navigation.getPose().getX() * 100;
 						} else if (currentLine_int % 2 == 1){
 							park_now_back_boundery = navigation.getPose().getY() * 100;
+							if(currentLine_int == 2){
+								park_now_back_boundery = park_now_back_boundery + 5;
+							}
 						}
 					}
 					
@@ -717,7 +806,11 @@ public class GuidanceAT {
 					// State transition check
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
-					if ((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() > 300)){	/////////////////////////////////////////////////
+					if(((perception.getFrontSideSensorDistance() > 300) && (perception.getBackSideSensorDistance() > 300)) || ((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() < 200))){
+						marker1 = true;
+					}
+					
+					if((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() > 300) && marker1){	/////////////////////////////////////////////////
 						if(currentLine_int % 2 == 0){
 							park_now_front_boundery = navigation.getPose().getX() * 100 + 5;
 						} else if (currentLine_int % 2 == 1){
@@ -732,8 +825,15 @@ public class GuidanceAT {
 						}
 					}
 					
+					if(currentLine != park_now_known_back_boundery_line){
+						sm_park_now_currentStatus = SM_park_now.LOOKING_FOR_SLOTS;
+					}
+					
 					// Leave action	
 					if (sm_park_now_currentStatus != SM_park_now.MEASURE_SLOT) {
+						
+						marker1 = false;
+						
 						control.setCtrlMode(ControlMode.INACTIVE);
 					}	
 					break;
@@ -742,7 +842,7 @@ public class GuidanceAT {
 					// Into action
 					if (sm_park_now_lastStatus != SM_park_now.DRIVE_TO_SLOT_BEGINNING) {
 						control.setAngularVelocity(0.0);
-						control.setVelocity(-8.0);					
+						control.setVelocity(-9.0);					
 						control.setCtrlMode(ControlMode.VW_CTRL);
 					}
 					
@@ -753,12 +853,19 @@ public class GuidanceAT {
 					
 					// State transition check
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
-					if ((perception.getFrontSideSensorDistance() < 300) && (perception.getBackSideSensorDistance() < 300) || perception.getBackSensorDistance() < 50){
+					
+					if(((perception.getFrontSideSensorDistance() > 300) && (perception.getBackSideSensorDistance() < 200))){
+						marker2 = true;
+					}
+					
+					if (((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() < 200) || currentLine_int == 4 || perception.getBackSensorDistance() < 50) && marker2){
 						sm_park_now_currentStatus = SM_park_now.PATH_GENERATOR;
 					}
 					
 					// Leave action	
 					if (sm_park_now_currentStatus != SM_park_now.DRIVE_TO_SLOT_BEGINNING) {
+						
+						marker2 = false;
 						
 						navigation.setDetectionState(false);
 						control.setCtrlMode(ControlMode.INACTIVE);
@@ -774,7 +881,7 @@ public class GuidanceAT {
 					// While action;
 					park_out_slotrange = park_now_slot_width;
 					
-					coefficients = coefficient_calculation(park_now_slot_width, 32.0, 1);
+					coefficients = coefficient_calculation(park_now_slot_width, 30.0, 1);
 					control.setCoefficients(coefficients);
 					
 					// State transition check
@@ -802,6 +909,7 @@ public class GuidanceAT {
 						
 						robo_in_parking_movement = true;
 						
+						control.resetParkVariables();
 						control.setCtrlMode(ControlMode.PARK_CTRL);						
 					}
 					
@@ -849,10 +957,9 @@ public class GuidanceAT {
 					
 					// Into action
 					if (sm_park_now_lastStatus != SM_park_now.CORRECT_PARKING_POSE) {
-						Sound.beepSequenceUp();
 
 						control.setAngularVelocity(0.0);		
-						control.setVelocity(-5.0);				
+						control.setVelocity(-8.0);				
 						control.setCtrlMode(ControlMode.VW_CTRL);
 					}
 					
@@ -880,21 +987,25 @@ public class GuidanceAT {
 				
 				// State transition check
 				lastStatus = currentStatus;
-				if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
-					currentStatus = CurrentStatus.EXIT;								
-					while (Button.ESCAPE.isDown()) {
-						Thread.sleep(1);
-					}
-				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.DISCONNECT) {
+				
+				if ((hmi.getMode() == parkingRobot.INxtHmi.Mode.PARK_THIS) && !robo_in_parking_movement) {	//PARK_NOW_MODUS
+					currentStatus = CurrentStatus.PARK_NOW;	
+				}  else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.DISCONNECT) {
 					currentStatus = CurrentStatus.EXIT;
 				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) {
 					currentStatus = CurrentStatus.INACTIVE;
 				} else if (SM_park_now_finnished) {
 					currentStatus = CurrentStatus.PARKED;
+				} else if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
+					currentStatus = CurrentStatus.EXIT;								
+					while (Button.ESCAPE.isDown()) {
+						Thread.sleep(1);
+					}
 				}
 				
 				// Leave action
 				if (currentStatus != CurrentStatus.PARK_NOW) {
+					sm_park_now_lastStatus = SM_park_now.CORRECT_PARKING_POSE;				////////////////////////
 					SM_park_now_finnished = false;
 				}
 				break;
@@ -951,7 +1062,7 @@ public class GuidanceAT {
 					}
 					
 					// While action;
-					coefficients = coefficient_calculation(park_out_slotrange, -32.0, -1);
+					coefficients = coefficient_calculation(park_out_slotrange, -45.0, -1);
 					control.setCoefficients(coefficients);
 					
 					// State transition check
@@ -977,6 +1088,7 @@ public class GuidanceAT {
 					// Into action
 					if (sm_park_out_lastStatus != SM_park_out.OUTPARKING_MANEUVER) {
 						
+						control.resetParkVariables();
 						control.setCtrlMode(ControlMode.PARK_CTRL);						
 					}
 					// While action
@@ -987,8 +1099,12 @@ public class GuidanceAT {
 					// State transition check
 					sm_park_out_lastStatus = sm_park_out_currentStatus;
 					
-					if(park_maneuver_finished){
-						
+//					if(park_maneuver_finished){
+//						
+//						sm_park_out_currentStatus = SM_park_out.PATH_GENERATOR;    //////////////////////  verzweigen auf korrektur bei kollision
+//					}
+					
+					if(perception.getLeftLineSensor() == 0 && perception.getRightLineSensor() == 2){
 						sm_park_out_currentStatus = SM_park_out.PATH_GENERATOR;    //////////////////////  verzweigen auf korrektur bei kollision
 					}
 					
@@ -1010,6 +1126,7 @@ public class GuidanceAT {
 					// While action
 					{
 						// nothing to do here
+						
 					}
 					
 					// State transition check
@@ -1185,15 +1302,36 @@ public class GuidanceAT {
 		if(version){
 		
 			
-			LCD.drawString("X (in cm): " + (navigation.getPose().getX() * 100), 0, 0);    /////////////////////////////////
-			LCD.drawString("Y (in cm): " + (navigation.getPose().getY() * 100), 0, 1);
-			LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);
-//			LCD.drawString("Status: " + (currentStatus), 0, 3);
-//			LCD.drawString("OUT_Status: " + (sm_park_out_currentStatus), 0, 4);
-//			LCD.drawString("IN_OUT: " + (park_in_or_out()), 0, 5);
-			LCD.drawString("Rigth: " + (perception.getRightLineSensorValue()), 0, 3);
-			LCD.drawString("Left: " + (perception.getLeftLineSensorValue()), 0, 4);
+//			LCD.drawString("X (in cm): " + (navigation.getPose().getX() * 100), 0, 0);    /////////////////////////////////
+//			LCD.drawString("Y (in cm): " + (navigation.getPose().getY() * 100), 0, 1);
+//			LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);
 
+			
+			
+//			LCD.drawString("C_Status: " + (currentStatus), 0, 0);
+//			LCD.drawString("L_Status: " + (lastStatus), 0, 1);
+//			LCD.drawString("C_P_THIS: " + (sm_park_this_currentStatus), 0, 2);
+//			LCD.drawString("L_P_THIS: " + (sm_park_this_lastStatus), 0, 3);
+//			LCD.drawString("C_P_NOW: " + (sm_park_now_currentStatus), 0, 4);
+//			LCD.drawString("L_P_NOW: " + (sm_park_now_lastStatus), 0, 5);
+//			LCD.drawString("C_P_OUT: " + (sm_park_out_currentStatus), 0, 6);
+//			LCD.drawString("L_P_OUT: " + (sm_park_out_lastStatus), 0, 7);
+	
+			LCD.drawString("schritt: " + (ControlRST.schritt), 0, 0);
+//			LCD.drawString("out2: " + (ControlRST.out2), 0, 1);
+			LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);
+			LCD.drawString("DESTphiO: " + (ControlRST.destinationPhiOut / Math.PI * 180), 0, 3);
+			LCD.drawString("Dest_Phi: " + (ControlRST.destinationPhi / Math.PI * 180), 0, 4);    /////////////////////////////////
+			LCD.drawString("x1: " + (x1), 0, 5);
+			LCD.drawString("Line: " + (currentLine_int), 0, 6);
+			LCD.drawString("in_or_out: " + (ControlRST.sign), 0, 7);
+
+//			LCD.drawString("BB_X: " + (BB_X), 0, 0);
+//			LCD.drawString("BB_Y: " + (BB_Y), 0, 1);
+//			LCD.drawString("FB_X: " + (FB_X), 0, 2);
+//			LCD.drawString("FB_Y: " + (FB_Y), 0, 3);
+
+			
 		} else if (!version){
 			
 			LCD.drawString("A: " + (x1), 0 ,0);    /////////////////////////////////
@@ -1201,18 +1339,26 @@ public class GuidanceAT {
 			LCD.drawString("C: " + (x3), 0, 2);    /////////////////////////////////
 			LCD.drawString("D: " + (x4), 0, 3);    /////////////////////////////////
 			LCD.drawString("Status: " + (currentStatus), 0, 4);    /////////////////////////////////
-			LCD.drawString("OUT_Weite: " + (park_now_slot_width), 0, 5);    /////////////////////////////////
-			LCD.drawString("B_Bound: " + (park_now_back_boundery), 0, 6);    /////////////////////////////////
-			LCD.drawString("F_Bound: " + (park_now_front_boundery), 0, 7);    /////////////////////////////////
+			LCD.drawString("P_NOW: " + (park_now_slot_width), 0, 5);    /////////////////////////////////
+			LCD.drawString("P_THIS: " + (park_this_selected_Parkingslot_Slotrange), 0, 6);    /////////////////////////////////
+			LCD.drawString("P_OUT: " + (park_out_slotrange), 0, 7);    /////////////////////////////////
 //			
 //			LCD.drawString("Left: " + (perception.getLeftLineSensor()), 0 ,0);    /////////////////////////////////
 //			LCD.drawString("Rigth: " + (perception.getRightLineSensor()), 0 ,1);    /////////////////////////////////
 //			LCD.drawString("Prev_Status: " + (), 0, 2);    /////////////////////////////////
-//			LCD.drawString("D: " + (x4), 0, 3);    /////////////////////////////////
-//			LCD.drawString("OUT_Weite: " + (park_now_slot_width), 0, 5);    /////////////////////////////////
-//			LCD.drawString("B_Bound: " + (park_now_back_boundery), 0, 6);    /////////////////////////////////
-//			LCD.drawString("F_Bound: " + (park_now_front_boundery), 0, 7);    /////////////////////////////////
+//			LCD.drawString("XXX: " + (park_now_known_Parking_Slot_to_park.getStatus()), 0, 3);}    /////////////////////////////////
+//			LCD.drawString("Line: " + (park_now_known_Parking_Slot_to_park.getLine()), 0, 5);    /////////////////////////////////
+//			LCD.drawString("B_Bound: " + (park_now_known_Parking_Slot_to_park.getBackBoundaryPosition().getX()), 0, 6);    /////////////////////////////////
+//			LCD.drawString("F_Bound: " + (park_now_known_Parking_Slot_to_park.getFrontBoundaryPosition().getX()), 0, 7);    /////////////////////////////////
 
+//			LCD.drawString("Dest_Phi: " + (ControlRST.destinationPhi / Math.PI * 180), 0, 4);    /////////////////////////////////
+//			LCD.drawString("Winkel: " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 5);    /////////////////////////////////
+//			LCD.drawString("Control_X3: " + (ControlRST.x3), 0, 6);    /////////////////////////////////
+//			LCD.drawString("GUI_X3: " + (x3), 0, 7);    /////////////////////////////////
+//			LCD.drawString("atan: " + (Math.atan(x3)/ Math.PI * 180), 0, 0);    /////////////////////////////////
+//			LCD.drawString("rechnung: " + ((Math.atan(x3) + (Math.PI * (3.0/2.0)))/ Math.PI * 180), 0, 1);    /////////////////////////////////
+
+			
 //		 perception.showSensorData();
 		}
 		

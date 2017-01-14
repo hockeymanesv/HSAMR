@@ -19,7 +19,7 @@ public class ControlThread extends Thread {
 	/**
 	 * 
 	 * 
-	 * @param perception
+	 * @param control
 	 */
 	ControlThread(IControl control){
     	this.control = control;
