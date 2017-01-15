@@ -107,9 +107,11 @@ public class AndroidHmiPLT implements IAndroidHmi {
 	 */
 	public synchronized void disconnect() {
 		try {
+			connected = false;
 			dataIn.close();
 			dataOut.close();
 			connectThread.close();
+			bTCommunicationThread.interrupt();
 		} catch (IOException e) {
 			e.printStackTrace();
 			Log.e("VERBINDUNGSKRAM","IOException: "+e.getMessage());

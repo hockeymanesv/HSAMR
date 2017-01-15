@@ -7,36 +7,35 @@ import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentTransaction;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
-
 import java.util.Set;
-
 import de.amr.plt.rcParkingRobot.AndroidHmiPLT;
-
 import static com.example.paulforster.nxtapp.MainActivity.BTArrayAdapter;
 import static com.example.paulforster.nxtapp.MainActivity.REQUEST_ENABLE_BT;
 import static com.example.paulforster.nxtapp.MainActivity.hmiModule;
 
 
 /**
- * Created by paulforster on 27.11.16.
+ * Lists bonded BTDevices
+ * @author paulforster
  */
 public class BluetoothDialogFragment extends DialogFragment {
-
     BluetoothAdapter mBluetoothAdapter = null;
     BluetoothDevice bluetoothDevice = null;
 
+    /**
+     *  ActivityLifecycle.
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Choose NXT");
-
+        builder.setTitle("Wähle NXT");
 
         BTArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1);
         // get paired devices
@@ -60,9 +59,8 @@ public class BluetoothDialogFragment extends DialogFragment {
             BTArrayAdapter.add(device.getName()+ "\n" + device.getAddress());
         }
         else {
-            builder.setMessage("No paired Devices");
+            builder.setMessage("paire ein Gerät!");
         }
-        //TODO ist finish der richtige Weg um die App zu beenden?
         builder.setNegativeButton("Beenden",new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // The 'which' argument contains the index position
@@ -82,6 +80,9 @@ public class BluetoothDialogFragment extends DialogFragment {
         return builder.create();
     }
 
+    /**
+     *  ActivityLifecycle.
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -102,17 +103,13 @@ public class BluetoothDialogFragment extends DialogFragment {
     private void establishBTConn(String address){
         //get instance of the chosen bluetooth device
         bluetoothDevice = mBluetoothAdapter.getRemoteDevice(address);
-
         //get name and address of the device
         String btDeviceAddress = bluetoothDevice.getAddress();
         String btDeviceName = bluetoothDevice.getName();
-
         //instantiate client modul
         hmiModule = new AndroidHmiPLT(btDeviceName, btDeviceAddress);
-
         //connect to the specified device
         hmiModule.connect();
-
         //wait till connection really is established and
         //TODO hier ein WarteDialog... das wäre cool
         /**
@@ -121,7 +118,5 @@ public class BluetoothDialogFragment extends DialogFragment {
             i++;
         }
          */
-        //TODO hier könnte man den StatusChangeListener platzieren
-
     }
 }

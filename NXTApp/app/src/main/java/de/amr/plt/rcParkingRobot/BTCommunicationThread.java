@@ -47,6 +47,7 @@ class BTCommunicationThread extends Thread {
 		// Transmitted integer, representing a message code
 		int code = -1;
 		while(true) {
+
 			if(hmi.connected) {			// Thread begins process of reading
 
 				try {

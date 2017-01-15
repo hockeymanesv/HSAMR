@@ -6,6 +6,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.RandomAccess;
 
+/**
+ * Implements an circular arraylist to be used for the pathgenerator.
+ *
+ * If you use this code, please consider notifying isak at du-preez dot com
+ * with a brief description of your application.
+ *
+ * This is free and unencumbered software released into the public domain.
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ * @author http://www.museful.net/2012/software-development/circulararraylist-for-java
+ * @param <E>
+ */
 public class CircularArrayList<E>
         extends AbstractList<E> implements RandomAccess {
 

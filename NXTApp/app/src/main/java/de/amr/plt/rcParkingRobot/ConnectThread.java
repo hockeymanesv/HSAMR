@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommFactory;
 import lejos.pc.comm.NXTCommLogListener;
 import lejos.pc.comm.NXTConnector;
@@ -31,6 +32,7 @@ class ConnectThread extends Thread {
 
 
 	private NXTConnector connector;
+	private NXTComm comm;
 
 	@Override
 	public void run() {
@@ -71,7 +73,10 @@ class ConnectThread extends Thread {
 	}
 	public void close(){
 		try {
+			connector.getInputStream().close();
+			connector.getOutputStream().close();
 			connector.close();
+			connector = null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
