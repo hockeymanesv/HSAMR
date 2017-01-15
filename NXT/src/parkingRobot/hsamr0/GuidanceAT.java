@@ -409,7 +409,7 @@ public class GuidanceAT {
 
 				// Into action
 				if (lastStatus != CurrentStatus.SCOUT) {
-					control.setCtrlMode(ControlMode.EXAMPLE_TWO);
+					control.setCtrlMode(ControlMode.LINE_CTRL);
 					navigation.setDetectionState(true);	
 				}
 
@@ -1205,13 +1205,13 @@ public class GuidanceAT {
 			case EXIT:
 				
 				Sound.buzz();
-				
 				hmi.disconnect();
 				/**
 				 * NOTE: RESERVED FOR FUTURE DEVELOPMENT (PLEASE DO NOT CHANGE)
 				 * // monitor.sendOfflineLog();
 				 */
 				monitor.stopLogging();
+				currentStatus = CurrentStatus.INACTIVE;
 				System.exit(0);
 				break;
 			default:
