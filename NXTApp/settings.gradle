@@ -1,3 +1,2 @@
-include ':app', ':tileview', ':demo', ':nXT'
+include ':app', ':tileview', ':nXT'
 project(':tileview').projectDir = new File('TileView-master/tileview')
-project(':demo').projectDir = new File('TileView-master/demo')
