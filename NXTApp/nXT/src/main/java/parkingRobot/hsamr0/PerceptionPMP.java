@@ -35,13 +35,13 @@ public class PerceptionPMP implements IPerception {
 	LightSensor leftLight 	= new LightSensor(SensorPort.S2);
 	LightSensor rightLight 	= new LightSensor(SensorPort.S1);
 	
-	double RightLineSensor		=	0;
-	double LeftLineSensor		=	0;
+	double RightLineSensor		=	0.0;
+	double LeftLineSensor		=	0.0;
 	//Achtung Sensoren getauscht!!!
-	double LSlwhite			=	58; 
-	double LSlblack			=	35;
-	double LSrwhite			=	54; 
-	double LSrblack			=	33;
+	double LSlwhite			=	58.0; 
+	double LSlblack			=	35.0;
+	double LSrwhite			=	54.0; 
+	double LSrblack			=	33.0;
 
 
 	double UOdmometry		=	0;
@@ -116,11 +116,11 @@ public class PerceptionPMP implements IPerception {
 	}
 	
 	public int getLeftLineSensorValue(){
-		return (int) ((this.LeftLineSensor-this.LSlblack)/(this.LSlwhite-this.LSlblack))*100;
+		return (int) (((this.LeftLineSensor-this.LSlblack)/(this.LSlwhite-this.LSlblack))*100.0);
 	}
 	
 	public int getRightLineSensorValue(){
-		return (int) ((this.RightLineSensor-this.LSrblack)/(this.LSrwhite-this.LSrblack))*100;
+		return (int) (((this.RightLineSensor-this.LSrblack)/(this.LSrwhite-this.LSrblack))*100.0);
 	}
 	
 	public synchronized void calibrateLineSensors(){

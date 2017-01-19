@@ -221,4 +221,5 @@ public interface INavigation {
 	}
 	
 	public int getCurrentLine();
+	public void setPoseFirstExampleProgram(double x, double y, double heading);
 }

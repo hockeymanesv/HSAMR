@@ -46,12 +46,12 @@ public interface IControl {
 		/**
 		 * erstes Beispielprogramm abspielen
 		 */
-//		EXAMPLE_ONE,
+		EXAMPLE_ONE,
 		
 		/**
 		 * zweites Beispielprogramm abspielen
 		 */
-//		EXAMPLE_TWO
+		EXAMPLE_TWO
 	}
 	
 		
@@ -111,15 +111,22 @@ public interface IControl {
 	
 	/**
 	 * Koeffizienten fuer Einparken und Ausparken uebergeben
-	 * @param Matrix Matrix mit berechneten den Parametern
+	 * @param matrix Matrix mit berechneten den Parametern
 	 */
 	public void setCoefficients(Matrix matrix);
 	
 	/**
 	 * setzt, ob beim Einparken oder Ausparken
-	 * @param status
+	 * @return sign of x1
 	 */
-	public void setInOrOut(boolean status);
+	public double inOrOut();
+	
+	
+	/**
+	 * reset variables which are relevant for parking
+	 */
+	public void resetParkVariables();
 
+	
 }
 

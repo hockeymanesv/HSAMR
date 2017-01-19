@@ -2,6 +2,7 @@ package parkingRobot.hsamr0;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 
 import parkingRobot.IControl;
 import parkingRobot.INavigation;
@@ -202,13 +203,29 @@ public class HmiPLT implements INxtHmi{
 	
 	/**
 	 * Closes the connection to remote control device.
+	 * 
+	 * Hier wurde vergessen die Flag für den ReaderThread zu setzen, das führte leider zum Absturz des NXT's bei Disconnect
 	 */
 	public void disconnect() {
 		if(useHMI){
-			connection.close();
-			dataIn = null;
+			
+		    try {
+		    	useHMI = false;
+		        LCD.drawString("Closing... ", 0, 0);
+		        dataIn.close();
+		        dataOut.flush();
+		        dataOut.close();
+		        connection.closeStream();
+		        connection.close();
+		      } catch (IOException ioe) {
+		        LCD.drawString("Close Exception", 0, 0);
+		      }
+		    dataIn = null;
 			dataOut = null;
 		}		
+	}
+	public boolean reconnect(){
+		return connect();
 	}
 
 }

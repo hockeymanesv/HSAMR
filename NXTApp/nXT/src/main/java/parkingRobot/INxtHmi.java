@@ -45,6 +45,8 @@ public interface INxtHmi {
 	 */
 	public void disconnect();
 	
+	public boolean reconnect();
+	
 	/**
 	 * Retrieves the currently selected parking slot to be used by the other robot modules. The parking slot is set via user request from a remote device.
 	 * @return ID of the currently selected parking slot
