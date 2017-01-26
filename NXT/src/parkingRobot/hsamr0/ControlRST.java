@@ -936,7 +936,7 @@ public class ControlRST implements IControl {
 			drive(velocity, omegaPark);
 
 			// Stoppbedingungen
-			boolean markerxIn = intervalContains(0.29, 0.3, neux);
+			boolean markerxIn = intervalContains(0.28, 0.3, neux);
 			if (markerxIn) {
 				schritt = 2; // wenn Pfad abgefahren, in Endausrichtung
 			}
@@ -951,7 +951,7 @@ public class ControlRST implements IControl {
 			if (navigation.getCurrentLine() == 0) {
 				destinationPhi = 0;
 			} else if (navigation.getCurrentLine() == 1) {
-				destinationPhi = Math.PI;
+				destinationPhi = Math.PI/2.0;
 			} else if (navigation.getCurrentLine() == 4) {
 				destinationPhi = Math.PI;
 			}

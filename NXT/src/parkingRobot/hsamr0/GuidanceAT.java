@@ -166,10 +166,6 @@ public class GuidanceAT {
 		 */
 		PARKING_MANEUVER,
 		/**
-		 * indicates that robot is correcting the parking maneuver
-		 */
-		CORRECT_PARKING_MANEUVER,
-		/**
 		 * indicates that robot is correcting the parking_pose
 		 */
 		CORRECT_PARKING_POSE
@@ -248,10 +244,6 @@ public class GuidanceAT {
 		 */
 		PARKING_MANEUVER,
 		/**
-		 * indicates that robot is correcting the parking maneuver
-		 */
-		CORRECT_PARKING_MANEUVER,
-		/**
 		 * indicates that robot is correcting the parking_pose
 		 */
 		CORRECT_PARKING_POSE
@@ -266,6 +258,14 @@ public class GuidanceAT {
 	 */
 	protected static SM_park_now sm_park_now_lastStatus = SM_park_now.CORRECT_PARKING_POSE;
 	/**
+	 * represents that the detected parking slot is known in park_now
+	 */
+	static ParkingSlot park_now_known_Parking_Slot_to_park = null;	
+	/**
+	 * represents that the known parking slot is to smal
+	 */
+	static boolean park_now_founded_slot_to_smal = false;
+	/**
 	 * represents the detected back boundery of an unknown parking slot in PARK_NOW mode
 	 */	
 	static float park_now_back_boundery = 0;
@@ -277,6 +277,31 @@ public class GuidanceAT {
 	 * represents the detected slot width of an unknown parking slot in PARK_NOW mode
 	 */	
 	static double park_now_slot_width = 0;
+	/**
+	 * park_now_slot_in_corner_fail
+	 */
+	static Line park_now_known_back_boundery_line = null;
+	/**
+	 * represents a signal to detect a slot at line 4
+	 */
+	static boolean park_now_special_line_4_failure = false;
+	/**
+	 * represents a special failure in looking for slot lines
+	 */
+	static boolean park_now_special_failure_in_looking_for_slots = false;
+	/**
+	 * represents a special failure in looking for slot lines
+	 */
+	static boolean park_now_special_failure_in_looking_for_slots_2 = false;
+	/**
+	 * represents a special failure in driving back to slot lines
+	 */
+	static boolean park_now_special_failure_in_driving_back = false;
+	
+	/**
+	 * represents the both side sensors are not occupied
+	 */
+	static boolean park_now_there_is_no_slot_jet = false;
 	/**
 	 * represents that the PARK_NOW state machine is run through
 	 */
@@ -297,10 +322,6 @@ public class GuidanceAT {
 		 * indicates that robot is parking into the slot
 		 */
 		OUTPARKING_MANEUVER,
-		/**
-		 * indicates that robot is correcting the parking maneuver
-		 */
-		CORRECT_OUTPARKING_MANEUVER,
 	}
 	
 	/**
@@ -311,7 +332,7 @@ public class GuidanceAT {
 	 * state in which the sub state machine(park_now-modus) was running before entering
 	 * the actual state
 	 */
-	protected static SM_park_out sm_park_out_lastStatus = SM_park_out.CORRECT_OUTPARKING_MANEUVER;
+	protected static SM_park_out sm_park_out_lastStatus = SM_park_out.OUTPARKING_MANEUVER;
 	/**
 	 * represents the detected slot width of an unknown parking slot in PARK_NOW mode
 	 */	
@@ -335,36 +356,7 @@ public class GuidanceAT {
 	/**
 	 * represents the signal that the parking maneuver is finished
 	 */
-	static boolean park_maneuver_finished = false;
-
-
-	
-	static double x1 = 0;					///////////test
-	static double x2 = 0;					///////////test
-	static double x3 = 0;					///////////test
-	static double x4 = 0;					///////////test
-	
-	static ParkingSlot park_now_known_Parking_Slot_to_park = null;	
-	static boolean park_now_founded_slot_to_smal = false;
-	static boolean park_now_found = false;
-	
-	
-	static boolean marker0 = false;
-	static boolean marker1 = false;
-	static boolean marker2 = false;
-	
-	static boolean marker3 = false;
-	/**
-	 * park_now_slot_in_corner_fail
-	 */
-	static Line park_now_known_back_boundery_line = null;
-	
-	
-	static double BB_X = 0;
-	static double BB_Y = 0;
-	static double FB_X = 0;
-	static double FB_Y = 0;
-
+	static boolean park_maneuver_finished = false;	
 	
 	/////////////
 	//MAIN METHOD
@@ -435,6 +427,8 @@ public class GuidanceAT {
 				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PARK_NOW) {	//PARK_NOW_MODUS
 					currentStatus = CurrentStatus.PARK_NOW;
 					
+				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) {		//INACTIVE
+					currentStatus = CurrentStatus.INACTIVE;
 				} else if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
 					currentStatus = CurrentStatus.EXIT;								
 					while (Button.ESCAPE.isDown()) {
@@ -442,9 +436,7 @@ public class GuidanceAT {
 					} // wait for button release
 				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.DISCONNECT) {
 					currentStatus = CurrentStatus.EXIT;
-				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) {
-					currentStatus = CurrentStatus.INACTIVE;
-				}
+				} 
 				
 				// Leave action
 				if (currentStatus != CurrentStatus.SCOUT) {
@@ -460,13 +452,6 @@ public class GuidanceAT {
 					park_this_selected_Parking_Slot = navigation.getParkingSlots()[park_this_selected_Parking_Slot_int];
 					park_this_selected_Parking_Slot_Line = map[park_this_selected_Parking_Slot.getLine()];
 					park_this_range_slotbeginning = (park_this_selected_Parking_Slot.getBackBoundaryPosition().getX() - 10);
-					
-					
-					BB_X = park_this_selected_Parking_Slot.getBackBoundaryPosition().getX();
-					BB_Y = park_this_selected_Parking_Slot.getBackBoundaryPosition().getY();
-					FB_X = park_this_selected_Parking_Slot.getFrontBoundaryPosition().getX();
-					FB_Y = park_this_selected_Parking_Slot.getFrontBoundaryPosition().getY();
-
 				}
 				
 				// While action
@@ -558,11 +543,6 @@ public class GuidanceAT {
 
 					// Leave action
 					if (sm_park_this_currentStatus != SM_park_this.PATH_GENERATOR) {
-						x1 = coefficients.get(0, 0);					///////////////////7/test
-						x2 = coefficients.get(1, 0);					///////////////////7/test
-						x3 = coefficients.get(2, 0);					///////////////////7/test
-						x4 = coefficients.get(3, 0);					///////////////////7/test
-						
 						coefficients = null;
 					}
 					break;
@@ -588,32 +568,12 @@ public class GuidanceAT {
 					
 					if(park_maneuver_finished){
 						
-						sm_park_this_currentStatus = SM_park_this.CORRECT_PARKING_POSE;    //////////////////////  verzweigen auf korrektur bei kollision
+						sm_park_this_currentStatus = SM_park_this.CORRECT_PARKING_POSE;
 					}
 					// Leave action
 					if (sm_park_this_currentStatus != SM_park_this.PARKING_MANEUVER) {
 						
 						park_maneuver_finished = false;
-						control.setCtrlMode(ControlMode.INACTIVE);
-					}
-					break;
-				case CORRECT_PARKING_MANEUVER:
-					
-					// Into action
-					if (sm_park_this_lastStatus != SM_park_this.CORRECT_PARKING_MANEUVER) {
-						// nothing to do here
-					}
-					
-					// While action
-					{
-						// nothing to do here
-					}
-					
-					// State transition check
-					sm_park_this_lastStatus = sm_park_this_currentStatus;
-
-					// Leave action
-					if (sm_park_this_currentStatus != SM_park_this.CORRECT_PARKING_MANEUVER) {
 						control.setCtrlMode(ControlMode.INACTIVE);
 					}
 					break;
@@ -659,11 +619,11 @@ public class GuidanceAT {
 					} // wait for button release	
 				} else if ((hmi.getMode() == parkingRobot.INxtHmi.Mode.PARK_NOW) && !robo_in_parking_movement) {	//PARK_NOW_MODUS
 					currentStatus = CurrentStatus.PARK_NOW;	
-				}  else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) {
+				}  else if ((hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) && !robo_in_parking_movement) {										//INACTIVE
 					currentStatus = CurrentStatus.INACTIVE;
-				} else if (SM_park_this_finnished) {
+				} else if (SM_park_this_finnished) {																//PARKED
 					currentStatus = CurrentStatus.PARKED;
-				} else if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
+				} else if (Button.ESCAPE.isDown()) {																//EXIT_PROJECT
 					currentStatus = CurrentStatus.EXIT;								
 					while (Button.ESCAPE.isDown()) {
 						Thread.sleep(1);
@@ -674,7 +634,7 @@ public class GuidanceAT {
 				
 				// Leave action
 				if (currentStatus != CurrentStatus.PARK_THIS) {
-					sm_park_this_lastStatus = SM_park_this.CORRECT_PARKING_POSE;				//////////////////////////
+					sm_park_this_lastStatus = SM_park_this.CORRECT_PARKING_POSE;				
 					SM_park_this_finnished = false;
 				}
 				break;
@@ -705,28 +665,28 @@ public class GuidanceAT {
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
 					if((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() < 200)){
-						marker0 = true;						////////////////////
+						park_now_there_is_no_slot_jet = true;					
 						park_now_founded_slot_to_smal = false;
 					}
 					
 					if(!park_now_founded_slot_to_smal){
-						if((currentLine_int == 0 || currentLine_int == 1) && marker0){
+						if((currentLine_int == 0 || currentLine_int == 1) && park_now_there_is_no_slot_jet){
 							if ((perception.getFrontSideSensorDistance() > 300) && (perception.getBackSideSensorDistance() < 200)){
 								sm_park_now_currentStatus = SM_park_now.IS_THE_SLOT_KNOWN;
 							}
 						}
 						
 						if(currentLine_int == 4 && perception.getFrontSideSensorDistance() < 150){
-							marker3 = true;
+							park_now_special_failure_in_looking_for_slots_2 = true;
 						}
-						if (marker3 && perception.getFrontSideSensorDistance() > 150){
+						if (park_now_special_failure_in_looking_for_slots_2 && perception.getFrontSideSensorDistance() > 150){
 							sm_park_now_currentStatus = SM_park_now.IS_THE_SLOT_KNOWN;
 						}
 					}
 					// Leave action	
 					if (sm_park_now_currentStatus != SM_park_now.LOOKING_FOR_SLOTS) {
-						marker3 = false;
-						marker0 = false;
+						park_now_special_failure_in_looking_for_slots_2 = false;
+						park_now_there_is_no_slot_jet = false;
 						control.setCtrlMode(ControlMode.INACTIVE);
 					}	
 					break;
@@ -807,10 +767,10 @@ public class GuidanceAT {
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
 					if(((perception.getFrontSideSensorDistance() > 300) && (perception.getBackSideSensorDistance() > 300)) || ((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() < 200))){
-						marker1 = true;
+						park_now_special_line_4_failure = true;
 					}
 					
-					if((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() > 300) && marker1){	/////////////////////////////////////////////////
+					if((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() > 300) && park_now_special_line_4_failure){	
 						if(currentLine_int % 2 == 0){
 							park_now_front_boundery = navigation.getPose().getX() * 100 + 5;
 						} else if (currentLine_int % 2 == 1){
@@ -832,7 +792,7 @@ public class GuidanceAT {
 					// Leave action	
 					if (sm_park_now_currentStatus != SM_park_now.MEASURE_SLOT) {
 						
-						marker1 = false;
+						park_now_special_line_4_failure = false;
 						
 						control.setCtrlMode(ControlMode.INACTIVE);
 					}	
@@ -855,17 +815,17 @@ public class GuidanceAT {
 					sm_park_now_lastStatus = sm_park_now_currentStatus;
 					
 					if(((perception.getFrontSideSensorDistance() > 300) && (perception.getBackSideSensorDistance() < 200))){
-						marker2 = true;
+						park_now_special_failure_in_driving_back = true;
 					}
 					
-					if (((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() < 200) || currentLine_int == 4 || perception.getBackSensorDistance() < 50) && marker2){
+					if (((perception.getFrontSideSensorDistance() < 200) && (perception.getBackSideSensorDistance() < 200) || currentLine_int == 4 || perception.getBackSensorDistance() < 50) && park_now_special_failure_in_driving_back){
 						sm_park_now_currentStatus = SM_park_now.PATH_GENERATOR;
 					}
 					
 					// Leave action	
 					if (sm_park_now_currentStatus != SM_park_now.DRIVE_TO_SLOT_BEGINNING) {
 						
-						marker2 = false;
+						park_now_special_failure_in_driving_back = false;
 						
 						navigation.setDetectionState(false);
 						control.setCtrlMode(ControlMode.INACTIVE);
@@ -893,13 +853,7 @@ public class GuidanceAT {
 	
 					// Leave action
 					if (sm_park_now_currentStatus != SM_park_now.PATH_GENERATOR) {
-						
-						x1 = coefficients.get(0, 0);			///////////////////////test
-						x2 = coefficients.get(1, 0);			///////////////////////test
-						x3 = coefficients.get(2, 0);			///////////////////////test
-						x4 = coefficients.get(3, 0);			///////////////////////test
-						
-						coefficients = null;
+					coefficients = null;
 					}
 					break;
 				case PARKING_MANEUVER:
@@ -923,7 +877,7 @@ public class GuidanceAT {
 					
 					if(park_maneuver_finished){
 						
-						sm_park_now_currentStatus = SM_park_now.CORRECT_PARKING_POSE;    //////////////////////  verzweigen auf korrektur bei kollision
+						sm_park_now_currentStatus = SM_park_now.CORRECT_PARKING_POSE;
 					}
 					
 					// Leave action
@@ -932,26 +886,6 @@ public class GuidanceAT {
 						park_maneuver_finished = false;
 						control.setCtrlMode(ControlMode.INACTIVE);
 					}
-					break;
-				case CORRECT_PARKING_MANEUVER:
-					
-					// Into action
-					if (sm_park_now_lastStatus != SM_park_now.CORRECT_PARKING_MANEUVER) {
-						control.setCtrlMode(ControlMode.LINE_CTRL);	
-					}
-					
-					// While action
-					{
-						// nothing to do here
-					}
-					
-					// State transition check
-					sm_park_now_lastStatus = sm_park_now_currentStatus;
-					
-					// Leave action	
-					if (sm_park_now_currentStatus != SM_park_now.CORRECT_PARKING_MANEUVER) {
-						control.setCtrlMode(ControlMode.INACTIVE);
-					}	
 					break;
 				case CORRECT_PARKING_POSE:
 					
@@ -990,22 +924,22 @@ public class GuidanceAT {
 				
 				if ((hmi.getMode() == parkingRobot.INxtHmi.Mode.PARK_THIS) && !robo_in_parking_movement) {	//PARK_NOW_MODUS
 					currentStatus = CurrentStatus.PARK_NOW;	
-				}  else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.DISCONNECT) {
-					currentStatus = CurrentStatus.EXIT;
-				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) {
-					currentStatus = CurrentStatus.INACTIVE;
-				} else if (SM_park_now_finnished) {
+				}    else if (SM_park_now_finnished) {														//PARKED
 					currentStatus = CurrentStatus.PARKED;
-				} else if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
+				} else if ((hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE) && !robo_in_parking_movement) {								//INACTIVE
+					currentStatus = CurrentStatus.INACTIVE;
+				} else if (Button.ESCAPE.isDown()) {														//EXIT_PROJECT
 					currentStatus = CurrentStatus.EXIT;								
 					while (Button.ESCAPE.isDown()) {
 						Thread.sleep(1);
 					}
+				}else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.DISCONNECT) {
+					currentStatus = CurrentStatus.EXIT;
 				}
 				
 				// Leave action
 				if (currentStatus != CurrentStatus.PARK_NOW) {
-					sm_park_now_lastStatus = SM_park_now.CORRECT_PARKING_POSE;				////////////////////////
+					sm_park_now_lastStatus = SM_park_now.CORRECT_PARKING_POSE;				
 					SM_park_now_finnished = false;
 				}
 				break;
@@ -1025,9 +959,9 @@ public class GuidanceAT {
 				lastStatus = currentStatus;
 				
 				if (hmi.getMode() == parkingRobot.INxtHmi.Mode.SCOUT) {				//PARK_OUT
-					currentStatus = CurrentStatus.PARK_OUT;			//////////////////////////////
+					currentStatus = CurrentStatus.PARK_OUT;		
 				} else if (Button.ENTER.isDown()) {
-						currentStatus = CurrentStatus.PARK_OUT;			//////////////////////////////	
+						currentStatus = CurrentStatus.PARK_OUT;				
 					while (Button.ENTER.isDown()) {
 						Thread.sleep(1);
 					} // wait for button release
@@ -1074,12 +1008,6 @@ public class GuidanceAT {
 
 					// Leave action
 					if (sm_park_out_currentStatus != SM_park_out.PATH_GENERATOR) {
-						
-						x1 = coefficients.get(0, 0);				//////////////////test
-						x2 = coefficients.get(1, 0);				//////////////////test
-						x3 = coefficients.get(2, 0);				//////////////////test
-						x4 = coefficients.get(3, 0);				//////////////////test
-						
 						coefficients = null;
 					}
 					break;
@@ -1098,14 +1026,9 @@ public class GuidanceAT {
 					
 					// State transition check
 					sm_park_out_lastStatus = sm_park_out_currentStatus;
-					
-//					if(park_maneuver_finished){
-//						
-//						sm_park_out_currentStatus = SM_park_out.PATH_GENERATOR;    //////////////////////  verzweigen auf korrektur bei kollision
-//					}
-					
+										
 					if(perception.getLeftLineSensor() == 0 && perception.getRightLineSensor() == 2){
-						sm_park_out_currentStatus = SM_park_out.PATH_GENERATOR;    //////////////////////  verzweigen auf korrektur bei kollision
+						sm_park_out_currentStatus = SM_park_out.PATH_GENERATOR;   
 					}
 					
 					// Leave action
@@ -1113,29 +1036,8 @@ public class GuidanceAT {
 						
 						control.setCtrlMode(ControlMode.INACTIVE);
 						park_maneuver_finished = false;
-						SM_park_out_finnished = true;							///////////////7 gucken ob das wirklich das ende ist..... kommt ja noch korrigieren
+						SM_park_out_finnished = true;						
 					}
-					break;
-				case CORRECT_OUTPARKING_MANEUVER:
-					
-					// Into action
-					if (sm_park_out_lastStatus != SM_park_out.CORRECT_OUTPARKING_MANEUVER) {
-
-					}
-					
-					// While action
-					{
-						// nothing to do here
-						
-					}
-					
-					// State transition check
-					sm_park_out_lastStatus = sm_park_out_currentStatus;
-					
-					// Leave action	
-					if (sm_park_out_currentStatus != SM_park_out.CORRECT_OUTPARKING_MANEUVER) {
-						control.setCtrlMode(ControlMode.INACTIVE);
-					}	
 					break;
 				default:
 					break;
@@ -1144,9 +1046,9 @@ public class GuidanceAT {
 				// State transition check
 				lastStatus = currentStatus;
 				
-				if (SM_park_out_finnished) {				//SCOUT_MODUS
-					currentStatus = CurrentStatus.SCOUT;			//////////////////////////////
-				}else if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
+				if (SM_park_out_finnished) {					//SCOUT_MODUS
+					currentStatus = CurrentStatus.SCOUT;		
+				}else if (Button.ESCAPE.isDown()) {				//EXIT_PROJECT
 					currentStatus = CurrentStatus.EXIT;								
 					while (Button.ESCAPE.isDown()) {
 						Thread.sleep(1);
@@ -1176,18 +1078,16 @@ public class GuidanceAT {
 				// State transition check
 				lastStatus = currentStatus;
 				if (hmi.getMode() == parkingRobot.INxtHmi.Mode.SCOUT) {				//SCOUT_MODUS
-						currentStatus = CurrentStatus.SCOUT;			//////////////////////////////
+						currentStatus = CurrentStatus.SCOUT;
 				} else if (Button.ENTER.isDown()) {
-						currentStatus = CurrentStatus.SCOUT;			//////////////////////////////	
+						currentStatus = CurrentStatus.SCOUT;	
 					while (Button.ENTER.isDown()) {
 						Thread.sleep(1);
 					} // wait for button release
 				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PARK_THIS) {	//PARK_THIS_MODUS
 					currentStatus = CurrentStatus.PARK_THIS;
-				
 				} else if (hmi.getMode() == parkingRobot.INxtHmi.Mode.PARK_NOW) {	//PARK_NOW_MODUS
 					currentStatus = CurrentStatus.PARK_NOW;
-					
 				} else if (Button.ESCAPE.isDown()) {								//EXIT_PROJECT
 					currentStatus = CurrentStatus.EXIT;								
 					while (Button.ESCAPE.isDown()) {
@@ -1203,7 +1103,6 @@ public class GuidanceAT {
 				}
 				break;
 			case EXIT:
-				
 				Sound.buzz();
 				hmi.disconnect();
 				/**
@@ -1214,6 +1113,7 @@ public class GuidanceAT {
 				currentStatus = CurrentStatus.INACTIVE;
 				System.exit(0);
 				break;
+				
 			default:
 				break;
 			}
@@ -1242,22 +1142,6 @@ public class GuidanceAT {
 	 */
 	public static boolean getParkmovementInfo(){
 		return robo_in_parking_movement;
-	}
-	/**
-	 * returns a information about robot is in a park-in or park-out movement 
-	 *
-	 * @return robot is in a park-in or park-out movement
-	 */
-	public static boolean park_in_or_out(){
-		
-		boolean modus = false;
-		if(currentStatus == CurrentStatus.PARK_THIS || currentStatus == CurrentStatus.PARK_NOW){
-			modus = false;
-		} else if(currentStatus == CurrentStatus.PARKED || currentStatus == CurrentStatus.PARK_OUT){
-			modus = true;
-		}
-		
-		return modus;
 	}
 	
 	/////////////
@@ -1296,79 +1180,13 @@ public class GuidanceAT {
 	 */
 	protected static void showData(INavigation navigation, IPerception perception) {
 		LCD.clear();
-
-		boolean version = true;
-		
-		if(version){
-		
 			
-//			LCD.drawString("X (in cm): " + (navigation.getPose().getX() * 100), 0, 0);    /////////////////////////////////
-//			LCD.drawString("Y (in cm): " + (navigation.getPose().getY() * 100), 0, 1);
-//			LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);
+		LCD.drawString("X (in cm): " + (navigation.getPose().getX() * 100), 0, 0);    /////////////////////////////////
+		LCD.drawString("Y (in cm): " + (navigation.getPose().getY() * 100), 0, 1);
+		LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);			
+		LCD.drawString("C_Status: " + (currentStatus), 0, 4);
 
-			
-			
-//			LCD.drawString("C_Status: " + (currentStatus), 0, 0);
-//			LCD.drawString("L_Status: " + (lastStatus), 0, 1);
-//			LCD.drawString("C_P_THIS: " + (sm_park_this_currentStatus), 0, 2);
-//			LCD.drawString("L_P_THIS: " + (sm_park_this_lastStatus), 0, 3);
-//			LCD.drawString("C_P_NOW: " + (sm_park_now_currentStatus), 0, 4);
-//			LCD.drawString("L_P_NOW: " + (sm_park_now_lastStatus), 0, 5);
-//			LCD.drawString("C_P_OUT: " + (sm_park_out_currentStatus), 0, 6);
-//			LCD.drawString("L_P_OUT: " + (sm_park_out_lastStatus), 0, 7);
-	
-			LCD.drawString("schritt: " + (ControlRST.schritt), 0, 0);
-//			LCD.drawString("out2: " + (ControlRST.out2), 0, 1);
-			LCD.drawString("Phi (grd): " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 2);
-			LCD.drawString("DESTphiO: " + (ControlRST.destinationPhiOut / Math.PI * 180), 0, 3);
-			LCD.drawString("Dest_Phi: " + (ControlRST.destinationPhi / Math.PI * 180), 0, 4);    /////////////////////////////////
-			LCD.drawString("x1: " + (x1), 0, 5);
-			LCD.drawString("Line: " + (currentLine_int), 0, 6);
-			LCD.drawString("status: " + (currentStatus), 0, 7);
-
-//			LCD.drawString("BB_X: " + (BB_X), 0, 0);
-//			LCD.drawString("BB_Y: " + (BB_Y), 0, 1);
-//			LCD.drawString("FB_X: " + (FB_X), 0, 2);
-//			LCD.drawString("FB_Y: " + (FB_Y), 0, 3);
-
-			
-		} else if (!version){
-			
-			LCD.drawString("A: " + (x1), 0 ,0);    /////////////////////////////////
-			LCD.drawString("B: " + (x2), 0 ,1);    /////////////////////////////////
-			LCD.drawString("C: " + (x3), 0, 2);    /////////////////////////////////
-			LCD.drawString("D: " + (x4), 0, 3);    /////////////////////////////////
-			LCD.drawString("Status: " + (currentStatus), 0, 4);    /////////////////////////////////
-			LCD.drawString("P_NOW: " + (park_now_slot_width), 0, 5);    /////////////////////////////////
-			LCD.drawString("P_THIS: " + (park_this_selected_Parkingslot_Slotrange), 0, 6);    /////////////////////////////////
-			LCD.drawString("P_OUT: " + (park_out_slotrange), 0, 7);    /////////////////////////////////
-//			
-//			LCD.drawString("Left: " + (perception.getLeftLineSensor()), 0 ,0);    /////////////////////////////////
-//			LCD.drawString("Rigth: " + (perception.getRightLineSensor()), 0 ,1);    /////////////////////////////////
-//			LCD.drawString("Prev_Status: " + (), 0, 2);    /////////////////////////////////
-//			LCD.drawString("XXX: " + (park_now_known_Parking_Slot_to_park.getStatus()), 0, 3);}    /////////////////////////////////
-//			LCD.drawString("Line: " + (park_now_known_Parking_Slot_to_park.getLine()), 0, 5);    /////////////////////////////////
-//			LCD.drawString("B_Bound: " + (park_now_known_Parking_Slot_to_park.getBackBoundaryPosition().getX()), 0, 6);    /////////////////////////////////
-//			LCD.drawString("F_Bound: " + (park_now_known_Parking_Slot_to_park.getFrontBoundaryPosition().getX()), 0, 7);    /////////////////////////////////
-
-//			LCD.drawString("Dest_Phi: " + (ControlRST.destinationPhi / Math.PI * 180), 0, 4);    /////////////////////////////////
-//			LCD.drawString("Winkel: " + (navigation.getPose().getHeading() / Math.PI * 180), 0, 5);    /////////////////////////////////
-//			LCD.drawString("Control_X3: " + (ControlRST.x3), 0, 6);    /////////////////////////////////
-//			LCD.drawString("GUI_X3: " + (x3), 0, 7);    /////////////////////////////////
-//			LCD.drawString("atan: " + (Math.atan(x3)/ Math.PI * 180), 0, 0);    /////////////////////////////////
-//			LCD.drawString("rechnung: " + ((Math.atan(x3) + (Math.PI * (3.0/2.0)))/ Math.PI * 180), 0, 1);    /////////////////////////////////
-
-			
 //		 perception.showSensorData();
-		}
-		
-		// if ( hmi.getMode() == parkingRobot.INxtHmi.Mode.SCOUT ){
-		// LCD.drawString("HMI Mode SCOUT", 0, 3);
-		// }else if ( hmi.getMode() == parkingRobot.INxtHmi.Mode.PAUSE ){
-		// LCD.drawString("HMI Mode PAUSE", 0, 3);
-		// }else{
-		// LCD.drawString("HMI Mode UNKNOWN", 0, 3);
-		// }
 	}
 	
 /**
