@@ -1324,7 +1324,7 @@ public class GuidanceAT {
 			LCD.drawString("Dest_Phi: " + (ControlRST.destinationPhi / Math.PI * 180), 0, 4);    /////////////////////////////////
 			LCD.drawString("x1: " + (x1), 0, 5);
 			LCD.drawString("Line: " + (currentLine_int), 0, 6);
-			LCD.drawString("in_or_out: " + (ControlRST.sign), 0, 7);
+			LCD.drawString("status: " + (currentStatus), 0, 7);
 
 //			LCD.drawString("BB_X: " + (BB_X), 0, 0);
 //			LCD.drawString("BB_Y: " + (BB_Y), 0, 1);
